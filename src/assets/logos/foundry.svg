@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <title>foundry</title>
+    <path d="M 18 28 L 14 43 L 24 43 Z" fill="#1a4a6a"/>
+    <rect x="22" y="24" width="62" height="26" rx="4" fill="#1a4a6a"/>
+    <rect x="34" y="50" width="38" height="9"  rx="2" fill="#1a4a6a"/>
+    <rect x="20" y="59" width="60" height="17" rx="3" fill="#1a4a6a"/>
+    <rect x="26" y="59" width="8"  height="17" rx="2" fill="#d48820" opacity="0.3"/>
+    <rect x="66" y="59" width="8"  height="17" rx="2" fill="#d48820" opacity="0.3"/>
+</svg>

@@ -1,0 +1,49 @@
+/* Diamond Legends — Design Tokens */
+
+:root {
+  /* Ballpark UI palette */
+  --stadium-green: #1a3a2a;
+  --stadium-green-mid: #224834;
+  --stadium-green-light: #2d5c42;
+  --wood-brown: #5c3d1e;
+  --wood-brown-light: #7a5230;
+  --amber: #f0a830;
+  --amber-light: #f5c060;
+  --amber-dim: #c8881a;
+  --parchment: #f5f0e8;
+  --parchment-dark: #e8e0d0;
+  --ink-dark: #1a1208;
+  --ink-mid: #3a2c18;
+
+  /* Era palettes */
+  --era-deadball-bg: #c8b89a;
+  --era-deadball-text: #2a1a08;
+  --era-deadball-accent: #8b6340;
+  --era-deadball-border: #6b4820;
+
+  --era-golden-bg: #e8d88a;
+  --era-golden-text: #1a1a2a;
+  --era-golden-accent: #c8882a;
+  --era-golden-border: #a86820;
+
+  --era-hardball-bg: #d84020;
+  --era-hardball-text: #fff8f0;
+  --era-hardball-accent: #1a4a8a;
+  --era-hardball-border: #b83010;
+
+  --era-modern-bg: #0a1a3a;
+  --era-modern-text: #e0eeff;
+  --era-modern-accent: #40a0ff;
+  --era-modern-border: #2060c0;
+
+  /* Rarity colors */
+  --rarity-common: #9ca3af;
+  --rarity-uncommon: #34d399;
+  --rarity-rare: #818cf8;
+  --rarity-legend: #f59e0b;
+
+  /* Typography */
+  --font-display: 'Playfair Display', 'Georgia', serif;
+  --font-ui: 'Roboto Mono', 'Courier New', monospace;
+  --font-body: 'Georgia', 'Times New Roman', serif;
+}

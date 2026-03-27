@@ -1,0 +1,127 @@
+[
+  {
+    "id": "ai_ironclads",
+    "name": "The Ironclads",
+    "difficulty": "easy",
+    "description": "A scrappy Deadball-heavy club. Lots of contact hitters and sinkerballers. Predictable patterns, low token spend.",
+    "aiProfile": {
+      "tokenAggressiveness": 0.2,
+      "relieverThreshold": 65,
+      "zoneVariety": 0.4,
+      "bluffFrequency": 0.1
+    },
+    "roster": [
+      { "cardId": null, "slot": "SP",  "franchiseId": "pilgrims", "era": "deadball", "position": "SP",  "tools": { "average": 66, "power": 30, "speed": 52, "fielding": 62, "arm": 84 }, "pitchRepertoire": ["FB", "SK"], "trait": "Iron Arm" },
+      { "cardId": null, "slot": "RP",  "franchiseId": "engines",  "era": "deadball", "position": "RP",  "tools": { "average": 55, "power": 28, "speed": 48, "fielding": 55, "arm": 74 }, "pitchRepertoire": ["SK", "CB"], "trait": null },
+      { "cardId": null, "slot": "C",   "franchiseId": "irons",    "era": "deadball", "position": "C",   "tools": { "average": 58, "power": 42, "speed": 38, "fielding": 74, "arm": 72 }, "trait": null },
+      { "cardId": null, "slot": "1B",  "franchiseId": "pilgrims", "era": "deadball", "position": "1B",  "tools": { "average": 74, "power": 55, "speed": 44, "fielding": 68, "arm": 60 }, "trait": "Table Setter" },
+      { "cardId": null, "slot": "2B",  "franchiseId": "engines",  "era": "deadball", "position": "2B",  "tools": { "average": 70, "power": 38, "speed": 66, "fielding": 72, "arm": 62 }, "trait": null },
+      { "cardId": null, "slot": "3B",  "franchiseId": "irons",    "era": "deadball", "position": "3B",  "tools": { "average": 62, "power": 50, "speed": 54, "fielding": 70, "arm": 70 }, "trait": null },
+      { "cardId": null, "slot": "SS",  "franchiseId": "peaches",  "era": "deadball", "position": "SS",  "tools": { "average": 68, "power": 35, "speed": 72, "fielding": 76, "arm": 66 }, "trait": null },
+      { "cardId": null, "slot": "LF",  "franchiseId": "foundry",  "era": "deadball", "position": "LF",  "tools": { "average": 72, "power": 48, "speed": 58, "fielding": 64, "arm": 60 }, "trait": null },
+      { "cardId": null, "slot": "CF",  "franchiseId": "pilgrims", "era": "deadball", "position": "CF",  "tools": { "average": 68, "power": 40, "speed": 78, "fielding": 72, "arm": 62 }, "trait": "Glove First" },
+      { "cardId": null, "slot": "RF",  "franchiseId": "irons",    "era": "deadball", "position": "RF",  "tools": { "average": 66, "power": 52, "speed": 60, "fielding": 66, "arm": 68 }, "trait": null },
+      { "cardId": null, "slot": "DH",  "franchiseId": "engines",  "era": "deadball", "position": "DH",  "tools": { "average": 76, "power": 60, "speed": 40, "fielding": 50, "arm": 52 }, "trait": "Clutch" }
+    ]
+  },
+  {
+    "id": "ai_goldenstars",
+    "name": "The Golden Stars",
+    "difficulty": "easy",
+    "description": "Classic Golden Age lineup with balanced contact and modest power. Relies on Curveball and Changeup starters.",
+    "aiProfile": {
+      "tokenAggressiveness": 0.3,
+      "relieverThreshold": 70,
+      "zoneVariety": 0.5,
+      "bluffFrequency": 0.15
+    },
+    "roster": [
+      { "cardId": null, "slot": "SP",  "franchiseId": "foghorns", "era": "golden", "position": "SP",  "tools": { "average": 68, "power": 35, "speed": 50, "fielding": 60, "arm": 80 }, "pitchRepertoire": ["FB", "CB", "CH"], "trait": "Workhorse" },
+      { "cardId": null, "slot": "RP",  "franchiseId": "deltas",   "era": "golden", "position": "RP",  "tools": { "average": 60, "power": 30, "speed": 46, "fielding": 58, "arm": 76 }, "pitchRepertoire": ["CB", "SK"], "trait": null },
+      { "cardId": null, "slot": "C",   "franchiseId": "empire",   "era": "golden", "position": "C",   "tools": { "average": 62, "power": 50, "speed": 40, "fielding": 78, "arm": 74 }, "trait": null },
+      { "cardId": null, "slot": "1B",  "franchiseId": "foghorns", "era": "golden", "position": "1B",  "tools": { "average": 76, "power": 65, "speed": 42, "fielding": 66, "arm": 58 }, "trait": "Power Hitter" },
+      { "cardId": null, "slot": "2B",  "franchiseId": "cinders",  "era": "golden", "position": "2B",  "tools": { "average": 72, "power": 40, "speed": 68, "fielding": 76, "arm": 64 }, "trait": null },
+      { "cardId": null, "slot": "3B",  "franchiseId": "ramblers", "era": "golden", "position": "3B",  "tools": { "average": 65, "power": 58, "speed": 56, "fielding": 68, "arm": 72 }, "trait": null },
+      { "cardId": null, "slot": "SS",  "franchiseId": "deltas",   "era": "golden", "position": "SS",  "tools": { "average": 70, "power": 38, "speed": 74, "fielding": 78, "arm": 66 }, "trait": "Slick Field" },
+      { "cardId": null, "slot": "LF",  "franchiseId": "empire",   "era": "golden", "position": "LF",  "tools": { "average": 74, "power": 55, "speed": 60, "fielding": 62, "arm": 60 }, "trait": null },
+      { "cardId": null, "slot": "CF",  "franchiseId": "cinders",  "era": "golden", "position": "CF",  "tools": { "average": 72, "power": 44, "speed": 80, "fielding": 76, "arm": 64 }, "trait": "Speed Demon" },
+      { "cardId": null, "slot": "RF",  "franchiseId": "foghorns", "era": "golden", "position": "RF",  "tools": { "average": 70, "power": 62, "speed": 58, "fielding": 66, "arm": 70 }, "trait": null },
+      { "cardId": null, "slot": "DH",  "franchiseId": "ramblers", "era": "golden", "position": "DH",  "tools": { "average": 78, "power": 70, "speed": 36, "fielding": 50, "arm": 50 }, "trait": "Plate Discipline" }
+    ]
+  },
+  {
+    "id": "ai_hardballers",
+    "name": "The Hardballers",
+    "difficulty": "medium",
+    "description": "Hardball Era powerhouse. Heavy Slider usage, aggressive token spending in late innings. Will pull starter early.",
+    "aiProfile": {
+      "tokenAggressiveness": 0.55,
+      "relieverThreshold": 60,
+      "zoneVariety": 0.6,
+      "bluffFrequency": 0.25
+    },
+    "roster": [
+      { "cardId": null, "slot": "SP",  "franchiseId": "foundry",  "era": "hardball", "position": "SP",  "tools": { "average": 70, "power": 38, "speed": 52, "fielding": 64, "arm": 86 }, "pitchRepertoire": ["FB", "SL", "CH"], "trait": "Strikeout Artist" },
+      { "cardId": null, "slot": "RP",  "franchiseId": "rovers",   "era": "hardball", "position": "RP",  "tools": { "average": 62, "power": 32, "speed": 50, "fielding": 60, "arm": 80 }, "pitchRepertoire": ["SL", "FB"], "trait": "Closer" },
+      { "cardId": null, "slot": "C",   "franchiseId": "empire",   "era": "hardball", "position": "C",   "tools": { "average": 64, "power": 60, "speed": 38, "fielding": 80, "arm": 78 }, "trait": "Arm Cannon" },
+      { "cardId": null, "slot": "1B",  "franchiseId": "foundry",  "era": "hardball", "position": "1B",  "tools": { "average": 72, "power": 82, "speed": 38, "fielding": 64, "arm": 56 }, "trait": "Slugger" },
+      { "cardId": null, "slot": "2B",  "franchiseId": "ramblers", "era": "hardball", "position": "2B",  "tools": { "average": 74, "power": 46, "speed": 70, "fielding": 78, "arm": 66 }, "trait": null },
+      { "cardId": null, "slot": "3B",  "franchiseId": "rovers",   "era": "hardball", "position": "3B",  "tools": { "average": 68, "power": 68, "speed": 54, "fielding": 70, "arm": 74 }, "trait": "Hot Corner" },
+      { "cardId": null, "slot": "SS",  "franchiseId": "empire",   "era": "hardball", "position": "SS",  "tools": { "average": 72, "power": 44, "speed": 76, "fielding": 82, "arm": 70 }, "trait": "Gold Glove" },
+      { "cardId": null, "slot": "LF",  "franchiseId": "foundry",  "era": "hardball", "position": "LF",  "tools": { "average": 76, "power": 76, "speed": 56, "fielding": 60, "arm": 64 }, "trait": "Power Bat" },
+      { "cardId": null, "slot": "CF",  "franchiseId": "ramblers", "era": "hardball", "position": "CF",  "tools": { "average": 74, "power": 50, "speed": 84, "fielding": 78, "arm": 66 }, "trait": "Five-Tool" },
+      { "cardId": null, "slot": "RF",  "franchiseId": "rovers",   "era": "hardball", "position": "RF",  "tools": { "average": 70, "power": 72, "speed": 60, "fielding": 64, "arm": 76 }, "trait": "Cannon Arm" },
+      { "cardId": null, "slot": "DH",  "franchiseId": "foundry",  "era": "hardball", "position": "DH",  "tools": { "average": 80, "power": 88, "speed": 30, "fielding": 48, "arm": 48 }, "trait": "Designated Destroyer" }
+    ]
+  },
+  {
+    "id": "ai_modernmachine",
+    "name": "The Modern Machine",
+    "difficulty": "hard",
+    "description": "Analytics-driven modern roster. Cut Fastball-heavy pitching, precise zone management, heavy late-inning Surge/Blitz token usage.",
+    "aiProfile": {
+      "tokenAggressiveness": 0.75,
+      "relieverThreshold": 55,
+      "zoneVariety": 0.75,
+      "bluffFrequency": 0.35
+    },
+    "roster": [
+      { "cardId": null, "slot": "SP",  "franchiseId": "ascent",  "era": "modern", "position": "SP",  "tools": { "average": 72, "power": 42, "speed": 54, "fielding": 66, "arm": 90 }, "pitchRepertoire": ["FB", "CF", "SL"], "trait": "Flamethrower" },
+      { "cardId": null, "slot": "RP",  "franchiseId": "glare",   "era": "modern", "position": "RP",  "tools": { "average": 64, "power": 36, "speed": 52, "fielding": 62, "arm": 86 }, "pitchRepertoire": ["CF", "SL"], "trait": "Elite Closer" },
+      { "cardId": null, "slot": "C",   "franchiseId": "empire",  "era": "modern", "position": "C",   "tools": { "average": 66, "power": 62, "speed": 42, "fielding": 84, "arm": 82 }, "trait": "Game Caller" },
+      { "cardId": null, "slot": "1B",  "franchiseId": "ascent",  "era": "modern", "position": "1B",  "tools": { "average": 74, "power": 88, "speed": 40, "fielding": 66, "arm": 58 }, "trait": "Launch Angle" },
+      { "cardId": null, "slot": "2B",  "franchiseId": "glare",   "era": "modern", "position": "2B",  "tools": { "average": 76, "power": 52, "speed": 74, "fielding": 82, "arm": 68 }, "trait": "On-Base Machine" },
+      { "cardId": null, "slot": "3B",  "franchiseId": "rovers",  "era": "modern", "position": "3B",  "tools": { "average": 70, "power": 78, "speed": 58, "fielding": 72, "arm": 76 }, "trait": "Exit Velo" },
+      { "cardId": null, "slot": "SS",  "franchiseId": "empire",  "era": "modern", "position": "SS",  "tools": { "average": 74, "power": 58, "speed": 80, "fielding": 86, "arm": 74 }, "trait": "Shortstop Elite" },
+      { "cardId": null, "slot": "LF",  "franchiseId": "ascent",  "era": "modern", "position": "LF",  "tools": { "average": 78, "power": 82, "speed": 62, "fielding": 64, "arm": 66 }, "trait": "Shift Beater" },
+      { "cardId": null, "slot": "CF",  "franchiseId": "glare",   "era": "modern", "position": "CF",  "tools": { "average": 76, "power": 56, "speed": 88, "fielding": 84, "arm": 68 }, "trait": "Center Field General" },
+      { "cardId": null, "slot": "RF",  "franchiseId": "rovers",  "era": "modern", "position": "RF",  "tools": { "average": 72, "power": 80, "speed": 64, "fielding": 68, "arm": 80 }, "trait": "Laser Arm" },
+      { "cardId": null, "slot": "DH",  "franchiseId": "foundry", "era": "modern", "position": "DH",  "tools": { "average": 82, "power": 92, "speed": 32, "fielding": 48, "arm": 48 }, "trait": "Pure Power" }
+    ]
+  },
+  {
+    "id": "ai_alleras",
+    "name": "The Legends",
+    "difficulty": "hard",
+    "description": "Cross-era superteam — the final boss of a 30-game season. Best available from every era. Unpredictable mix of pitch types. Maximum token aggression.",
+    "aiProfile": {
+      "tokenAggressiveness": 0.90,
+      "relieverThreshold": 50,
+      "zoneVariety": 0.85,
+      "bluffFrequency": 0.45
+    },
+    "roster": [
+      { "cardId": null, "slot": "SP",  "franchiseId": "pilgrims", "era": "deadball", "position": "SP",  "tools": { "average": 74, "power": 42, "speed": 55, "fielding": 68, "arm": 94 }, "pitchRepertoire": ["FB", "SK", "KN"], "trait": "Iron Arm", "legendOnly": true },
+      { "cardId": null, "slot": "RP",  "franchiseId": "ascent",   "era": "modern",   "position": "RP",  "tools": { "average": 68, "power": 40, "speed": 56, "fielding": 64, "arm": 92 }, "pitchRepertoire": ["CF", "SL"], "trait": "Elite Closer" },
+      { "cardId": null, "slot": "C",   "franchiseId": "foundry",  "era": "hardball", "position": "C",   "tools": { "average": 70, "power": 66, "speed": 40, "fielding": 86, "arm": 84 }, "trait": "Iron Glove" },
+      { "cardId": null, "slot": "1B",  "franchiseId": "foundry",  "era": "hardball", "position": "1B",  "tools": { "average": 76, "power": 90, "speed": 38, "fielding": 66, "arm": 58 }, "trait": "Cleanup Hitter" },
+      { "cardId": null, "slot": "2B",  "franchiseId": "empire",   "era": "golden",   "position": "2B",  "tools": { "average": 78, "power": 48, "speed": 72, "fielding": 84, "arm": 68 }, "trait": "Keystone" },
+      { "cardId": null, "slot": "3B",  "franchiseId": "rovers",   "era": "modern",   "position": "3B",  "tools": { "average": 72, "power": 82, "speed": 60, "fielding": 74, "arm": 78 }, "trait": "Hot Corner" },
+      { "cardId": null, "slot": "SS",  "franchiseId": "deltas",   "era": "golden",   "position": "SS",  "tools": { "average": 74, "power": 44, "speed": 82, "fielding": 88, "arm": 72 }, "trait": "Wizard" },
+      { "cardId": null, "slot": "LF",  "franchiseId": "peaches",  "era": "deadball", "position": "LF",  "tools": { "average": 80, "power": 70, "speed": 68, "fielding": 68, "arm": 66 }, "trait": "Five-Tool Legend" },
+      { "cardId": null, "slot": "CF",  "franchiseId": "foghorns", "era": "golden",   "position": "CF",  "tools": { "average": 78, "power": 58, "speed": 90, "fielding": 86, "arm": 70 }, "trait": "Greatest Of His Era" },
+      { "cardId": null, "slot": "RF",  "franchiseId": "empire",   "era": "hardball", "position": "RF",  "tools": { "average": 76, "power": 86, "speed": 66, "fielding": 70, "arm": 84 }, "trait": "Arm and Power" },
+      { "cardId": null, "slot": "DH",  "franchiseId": "irons",    "era": "deadball", "position": "DH",  "tools": { "average": 84, "power": 78, "speed": 42, "fielding": 52, "arm": 54 }, "trait": "Living Legend" }
+    ]
+  }
+]

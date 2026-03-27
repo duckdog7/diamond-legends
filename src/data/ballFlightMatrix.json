@@ -1,0 +1,171 @@
+{
+  "_notes": "Pitch type × contact zone → field zone. Contact zones: high / mid / low. Field zones map to defensive positions per GDD §5.6. Difficulty: routine / moderate / difficult / exceptional.",
+
+  "FB": {
+    "high": {
+      "fieldZone": "deep_cf_rcf",
+      "primaryFielder": "CF",
+      "secondaryFielder": "RF",
+      "baseDifficulty": "difficult",
+      "extraBaseRisk": "high",
+      "armMatters": true
+    },
+    "mid": {
+      "fieldZone": "deep_lf_lcf",
+      "primaryFielder": "LF",
+      "secondaryFielder": "CF",
+      "baseDifficulty": "difficult",
+      "extraBaseRisk": "high",
+      "armMatters": true
+    },
+    "low": {
+      "fieldZone": "shallow_cf_rf",
+      "primaryFielder": "CF",
+      "secondaryFielder": "RF",
+      "baseDifficulty": "moderate",
+      "extraBaseRisk": "low",
+      "armMatters": true
+    }
+  },
+
+  "CB": {
+    "high": {
+      "fieldZone": "infield_left",
+      "primaryFielder": "3B",
+      "secondaryFielder": "SS",
+      "baseDifficulty": "moderate",
+      "extraBaseRisk": "low",
+      "armMatters": true
+    },
+    "mid": {
+      "fieldZone": "infield_middle",
+      "primaryFielder": "SS",
+      "secondaryFielder": "2B",
+      "baseDifficulty": "routine",
+      "extraBaseRisk": "none",
+      "armMatters": true,
+      "doublePlayEligible": true
+    },
+    "low": {
+      "fieldZone": "infield_left_line",
+      "primaryFielder": "3B",
+      "secondaryFielder": null,
+      "baseDifficulty": "difficult",
+      "extraBaseRisk": "high",
+      "armMatters": false
+    }
+  },
+
+  "CH": {
+    "high": {
+      "fieldZone": "infield_right",
+      "primaryFielder": "2B",
+      "secondaryFielder": "1B",
+      "baseDifficulty": "routine",
+      "extraBaseRisk": "none",
+      "armMatters": false
+    },
+    "mid": {
+      "fieldZone": "shallow_rf",
+      "primaryFielder": "RF",
+      "secondaryFielder": "2B",
+      "baseDifficulty": "routine",
+      "extraBaseRisk": "none",
+      "armMatters": false
+    },
+    "low": {
+      "fieldZone": "infield_middle",
+      "primaryFielder": "2B",
+      "secondaryFielder": "SS",
+      "baseDifficulty": "routine",
+      "extraBaseRisk": "none",
+      "armMatters": true,
+      "doublePlayEligible": true
+    }
+  },
+
+  "SL": {
+    "any": {
+      "fieldZone": "infield_middle",
+      "primaryFielder": "SS",
+      "secondaryFielder": "2B",
+      "baseDifficulty": "moderate",
+      "extraBaseRisk": "none",
+      "armMatters": true,
+      "doublePlayEligible": true,
+      "doublePlayBonus": 0.20
+    }
+  },
+
+  "SK": {
+    "any": {
+      "fieldZone": "infield_hard_ground",
+      "primaryFielder": "SS",
+      "secondaryFielder": ["2B", "3B"],
+      "baseDifficulty": "moderate",
+      "extraBaseRisk": "none",
+      "armMatters": true,
+      "doublePlayEligible": true,
+      "doublePlayBonus": 0.20
+    }
+  },
+
+  "CF": {
+    "any": {
+      "fieldZone": "infield_right",
+      "primaryFielder": "2B",
+      "secondaryFielder": "1B",
+      "baseDifficulty": "routine",
+      "extraBaseRisk": "none",
+      "armMatters": false,
+      "contactQuality": "weak_popup"
+    }
+  },
+
+  "KN": {
+    "any": {
+      "fieldZone": "random",
+      "primaryFielder": "random",
+      "secondaryFielder": null,
+      "baseDifficulty": "random",
+      "extraBaseRisk": "random",
+      "armMatters": "random",
+      "doublePlayEligible": false,
+      "zonePool": [
+        "infield_left", "infield_middle", "infield_right",
+        "shallow_lf", "shallow_cf", "shallow_rf",
+        "deep_lf_lcf", "deep_cf_rcf", "shallow_cf_rf"
+      ],
+      "difficultyPool": ["routine", "moderate", "difficult", "exceptional"]
+    }
+  },
+
+  "_fieldZoneMap": {
+    "infield_left":       { "fielders": ["3B", "SS"], "armMatters": true,  "note": "Throw to 1B across diamond" },
+    "infield_middle":     { "fielders": ["SS", "2B"], "armMatters": true,  "note": "Pivot throw, double play potential" },
+    "infield_right":      { "fielders": ["2B", "1B"], "armMatters": false, "note": "Short throw" },
+    "infield_left_line":  { "fielders": ["3B"],       "armMatters": false, "note": "Down the line — extra base likely" },
+    "infield_hard_ground":{ "fielders": ["SS", "2B", "3B"], "armMatters": true, "note": "Hard grounder, dp prime" },
+    "shallow_lf":         { "fielders": ["LF"],       "armMatters": true,  "note": "Throw to cut-off, hold at 1B" },
+    "shallow_cf":         { "fielders": ["CF"],        "armMatters": true,  "note": "Hold runners, arm matters" },
+    "shallow_rf":         { "fielders": ["RF"],        "armMatters": true,  "note": "Throw to 2B or cut-off" },
+    "shallow_cf_rf":      { "fielders": ["CF", "RF"],  "armMatters": true,  "note": "Moderate difficulty, line drive range" },
+    "deep_lf_lcf":        { "fielders": ["LF"],        "armMatters": true,  "note": "Gap hit — arm determines 2B vs 3B" },
+    "deep_cf_rcf":        { "fielders": ["CF"],         "armMatters": true,  "note": "Range + arm, gap hit territory" },
+    "deep_rf":            { "fielders": ["RF"],         "armMatters": true,  "note": "Arm determines 2B vs 3B" }
+  },
+
+  "_defensiveSuccessProbabilities": {
+    "routine":     { "glove80plus": 0.98, "glove60": 0.90, "glove40": 0.78 },
+    "moderate":    { "glove80plus": 0.85, "glove60": 0.72, "glove40": 0.55 },
+    "difficult":   { "glove80plus": 0.65, "glove60": 0.48, "glove40": 0.30 },
+    "exceptional": { "glove80plus": 0.35, "glove60": 0.20, "glove40": 0.08 }
+  },
+
+  "_tokenEffects": {
+    "pullShift":   { "cost": 2, "effect": "Move ball flight one zone toward pull side" },
+    "oppoPush":    { "cost": 2, "effect": "Move ball flight one zone toward opposite field" },
+    "gapFinder":   { "cost": 4, "effect": "Force to nearest gap zone (LCF or RCF). No infield contact." },
+    "infieldIn":   { "cost": 3, "effect": "Convert any shallow OF or infield to slow roller — maximizes arm pressure" }
+  }
+}

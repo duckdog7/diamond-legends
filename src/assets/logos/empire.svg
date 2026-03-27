@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <title>empire</title>
+    <rect x="14" y="57" width="72" height="22" rx="3" fill="#1a1a3a"/>
+    <path d="M 14 57 L 14 22 L 29 40 L 43 18 L 50 36 L 57 18 L 71 40 L 86 22 L 86 57 Z" fill="#1a1a3a"/>
+    <circle cx="29" cy="42" r="4" fill="#d4a520"/>
+    <circle cx="50" cy="38" r="4" fill="#d4a520"/>
+    <circle cx="71" cy="42" r="4" fill="#d4a520"/>
+</svg>

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <title>deltas</title>
+    <path d="M 50 82 L 10 22 L 90 22 Z" fill="#1a4a2a"/>
+    <path d="M 50 65 L 24 38 L 76 38 Z" fill="#d4a520" opacity="0.35"/>
+    <path d="M 50 50 L 34 30 L 66 30 Z" fill="#d4a520" opacity="0.55"/>
+</svg>

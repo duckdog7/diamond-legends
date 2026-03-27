@@ -1,0 +1,203 @@
+[
+  {
+    "id": "FB",
+    "name": "Fastball",
+    "abbreviation": "FB",
+    "eraAvailability": ["deadball", "golden", "hardball", "modern"],
+    "requiresArmStrength": null,
+    "legendOnly": false,
+    "description": "High zone affinity. Full power dice pool on dual correct prediction. Type wrong on correct zone causes timing disruption (pool -1 die).",
+    "zoneAffinities": {
+      "TL": 0.10, "TC": 0.18, "TR": 0.10,
+      "ML": 0.12, "MC": 0.14, "MR": 0.12,
+      "BL": 0.08, "BC": 0.10, "BR": 0.06
+    },
+    "contactEffect": {
+      "bothCorrect": "full_pool",
+      "zoneCorrectTypeWrong": "pool_minus_1",
+      "typeCorrectZoneWrong": "pool_minus_2",
+      "bothWrong": "no_contact"
+    },
+    "ballFlight": {
+      "high": "deep_cf_rcf",
+      "mid": "deep_lf_lcf",
+      "low": "shallow_cf_rf"
+    },
+    "strikeoutBonus": null,
+    "doublePlayBonus": null,
+    "ignoresBudgets": false,
+    "notes": "Arm Strength increases FB effectiveness modifier."
+  },
+  {
+    "id": "CB",
+    "name": "Curveball",
+    "abbreviation": "CB",
+    "eraAvailability": ["deadball", "golden", "hardball"],
+    "requiresArmStrength": null,
+    "legendOnly": false,
+    "description": "Natural Low-Away affinity. Both wrong: automatic swing-and-miss. Both correct: highest hit quality potential.",
+    "zoneAffinities": {
+      "TL": 0.04, "TC": 0.05, "TR": 0.06,
+      "ML": 0.08, "MC": 0.10, "MR": 0.12,
+      "BL": 0.12, "BC": 0.18, "BR": 0.25
+    },
+    "contactEffect": {
+      "bothCorrect": "full_pool_plus_quality",
+      "zoneCorrectTypeWrong": "pool_minus_1",
+      "typeCorrectZoneWrong": "pool_minus_2",
+      "bothWrong": "automatic_miss"
+    },
+    "ballFlight": {
+      "high": "infield_left_3b_ss",
+      "mid": "pulled_ground_ss",
+      "low": "hard_pull_3b_line"
+    },
+    "strikeoutBonus": "both_wrong_automatic_miss",
+    "doublePlayBonus": null,
+    "ignoresBudgets": false,
+    "notes": "Rare in Modern repertoires. Deadball and Golden primary secondary offering."
+  },
+  {
+    "id": "CH",
+    "name": "Changeup",
+    "abbreviation": "CH",
+    "eraAvailability": ["golden", "hardball", "modern"],
+    "requiresArmStrength": null,
+    "legendOnly": false,
+    "description": "Same zone affinity as Fastball — deliberate deception. Zone correct + type wrong drops contact quality one full tier regardless of dice pool.",
+    "zoneAffinities": {
+      "TL": 0.10, "TC": 0.18, "TR": 0.10,
+      "ML": 0.12, "MC": 0.14, "MR": 0.12,
+      "BL": 0.08, "BC": 0.10, "BR": 0.06
+    },
+    "contactEffect": {
+      "bothCorrect": "full_pool",
+      "zoneCorrectTypeWrong": "contact_tier_minus_1",
+      "typeCorrectZoneWrong": "pool_minus_2",
+      "bothWrong": "no_contact"
+    },
+    "ballFlight": {
+      "high": "infield_right_2b_1b",
+      "mid": "shallow_rf",
+      "low": "weak_infield_middle"
+    },
+    "strikeoutBonus": null,
+    "doublePlayBonus": "weak_infield_dp_opportunity",
+    "ignoresBudgets": false,
+    "notes": "Most effective vs. high-Average batters who key on zone location."
+  },
+  {
+    "id": "SL",
+    "name": "Slider",
+    "abbreviation": "SL",
+    "eraAvailability": ["hardball", "modern"],
+    "requiresArmStrength": 65,
+    "legendOnly": false,
+    "description": "Low-Inside affinity. +15% effectiveness in pitcher's counts. Waste pitch breaking out of zone = automatic miss on chase.",
+    "zoneAffinities": {
+      "TL": 0.04, "TC": 0.06, "TR": 0.04,
+      "ML": 0.16, "MC": 0.10, "MR": 0.08,
+      "BL": 0.26, "BC": 0.14, "BR": 0.12
+    },
+    "contactEffect": {
+      "bothCorrect": "full_pool",
+      "zoneCorrectTypeWrong": "pool_minus_1",
+      "typeCorrectZoneWrong": "pool_minus_2",
+      "bothWrong": "no_contact"
+    },
+    "ballFlight": {
+      "any": "ground_ball_infield_middle"
+    },
+    "countBonus": {
+      "counts": ["0-2", "1-2"],
+      "effectivenessBonus": 0.15
+    },
+    "strikeoutBonus": null,
+    "doublePlayBonus": 0.20,
+    "ignoresBudgets": false,
+    "notes": "Left over the plate is highly hittable. Requires Arm Strength 65+."
+  },
+  {
+    "id": "SK",
+    "name": "Sinker",
+    "abbreviation": "SK",
+    "eraAvailability": ["deadball", "golden", "hardball", "modern"],
+    "requiresArmStrength": null,
+    "legendOnly": false,
+    "description": "Mid-to-Low affinity. Heavy downward movement. Double play probability +20%. Fewer strikeouts but defense-friendly.",
+    "zoneAffinities": {
+      "TL": 0.03, "TC": 0.05, "TR": 0.03,
+      "ML": 0.14, "MC": 0.18, "MR": 0.14,
+      "BL": 0.14, "BC": 0.18, "BR": 0.11
+    },
+    "contactEffect": {
+      "bothCorrect": "full_pool",
+      "zoneCorrectTypeWrong": "pool_minus_1",
+      "typeCorrectZoneWrong": "pool_minus_2",
+      "bothWrong": "no_contact"
+    },
+    "ballFlight": {
+      "any": "hard_ground_infield"
+    },
+    "strikeoutBonus": null,
+    "doublePlayBonus": 0.20,
+    "ignoresBudgets": false,
+    "notes": "Deadball era name: 'Drop Ball'. High value with strong infield defense."
+  },
+  {
+    "id": "CF",
+    "name": "Cut Fastball",
+    "abbreviation": "CF",
+    "eraAvailability": ["modern"],
+    "requiresArmStrength": null,
+    "legendOnly": false,
+    "description": "High-to-Mid Inside affinity. Breaks toward batter's hands. Jams hitters: Power dice pool -1 die on any contact.",
+    "zoneAffinities": {
+      "TL": 0.20, "TC": 0.10, "TR": 0.04,
+      "ML": 0.28, "MC": 0.14, "MR": 0.05,
+      "BL": 0.10, "BC": 0.06, "BR": 0.03
+    },
+    "contactEffect": {
+      "bothCorrect": "full_pool_power_minus_1",
+      "zoneCorrectTypeWrong": "pool_minus_1_power_minus_1",
+      "typeCorrectZoneWrong": "pool_minus_2",
+      "bothWrong": "no_contact"
+    },
+    "ballFlight": {
+      "any": "weak_popup_infield_right"
+    },
+    "strikeoutBonus": null,
+    "doublePlayBonus": null,
+    "ignoresBudgets": false,
+    "notes": "Deadball equivalent: 'In-Shoot'. Broken-bat pop-up quality contact."
+  },
+  {
+    "id": "KN",
+    "name": "Knuckleball",
+    "abbreviation": "KN",
+    "eraAvailability": ["deadball", "golden", "hardball", "modern"],
+    "requiresArmStrength": null,
+    "legendOnly": true,
+    "description": "Ignores both zone and pitch type budgets entirely. Location semi-random within a 3-zone spread. Does not accumulate zone or pitch type fatigue.",
+    "zoneAffinities": {
+      "TL": 0.11, "TC": 0.11, "TR": 0.11,
+      "ML": 0.11, "MC": 0.12, "MR": 0.11,
+      "BL": 0.11, "BC": 0.11, "BR": 0.11
+    },
+    "actualZoneSpread": 3,
+    "contactEffect": {
+      "bothCorrect": "full_pool",
+      "zoneCorrectTypeWrong": "pool_minus_1",
+      "typeCorrectZoneWrong": "pool_minus_2",
+      "bothWrong": "no_contact"
+    },
+    "ballFlight": {
+      "any": "random_all_zones"
+    },
+    "strikeoutBonus": null,
+    "doublePlayBonus": null,
+    "ignoresBudgets": true,
+    "accumulatesFatigue": false,
+    "notes": "Legend-tier pitcher cards only. Ball flight and defensive difficulty both random."
+  }
+]

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <title>rovers</title>
+    <path d="M 50.00 6.00 L 61.31 38.69 L 94.00 50.00 L 61.31 61.31 L 50.00 94.00 L 38.69 61.31 L 6.00 50.00 L 38.69 38.69 Z" fill="#c85a1a"/>
+    <path d="M 72.63 27.37 L 64.00 50.00 L 72.63 72.63 L 50.00 64.00 L 27.37 72.63 L 36.00 50.00 L 27.37 27.37 L 50.00 36.00 Z" fill="#d4b896" opacity="0.7"/>
+    <circle cx="50" cy="50" r="8" fill="#c85a1a"/>
+    <circle cx="50" cy="50" r="4" fill="#d4b896"/>
+</svg>

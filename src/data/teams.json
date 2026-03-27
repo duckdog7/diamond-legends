@@ -1,0 +1,216 @@
+[
+  {
+    "franchiseId": "irons",
+    "eras": ["deadball", "golden", "hardball", "modern"],
+    "history": [
+      {
+        "eras": ["deadball", "golden", "hardball", "modern"],
+        "city": "Chicago",
+        "name": "Irons",
+        "primary": "#1a2a4a",
+        "secondary": "#8b2020",
+        "abbreviation": "CHI"
+      }
+    ]
+  },
+  {
+    "franchiseId": "pilgrims",
+    "eras": ["deadball", "golden", "hardball", "modern"],
+    "history": [
+      {
+        "eras": ["deadball", "golden", "hardball", "modern"],
+        "city": "Boston",
+        "name": "Pilgrims",
+        "primary": "#8b1a1a",
+        "secondary": "#f5f0e8",
+        "abbreviation": "BOS"
+      }
+    ]
+  },
+  {
+    "franchiseId": "peaches",
+    "eras": ["deadball", "golden", "hardball", "modern"],
+    "history": [
+      {
+        "eras": ["deadball", "golden", "hardball", "modern"],
+        "city": "Atlanta",
+        "name": "Peaches",
+        "primary": "#1a4a2a",
+        "secondary": "#f5a878",
+        "abbreviation": "ATL"
+      }
+    ]
+  },
+  {
+    "franchiseId": "foghorns",
+    "eras": ["deadball", "golden", "hardball", "modern"],
+    "history": [
+      {
+        "eras": ["deadball", "golden", "hardball", "modern"],
+        "city": "San Francisco",
+        "name": "Foghorns",
+        "primary": "#2a3a5a",
+        "secondary": "#a0a8b0",
+        "abbreviation": "SFO"
+      }
+    ]
+  },
+  {
+    "franchiseId": "empire",
+    "eras": ["deadball", "golden", "hardball", "modern"],
+    "history": [
+      {
+        "eras": ["deadball", "golden"],
+        "city": "Brooklyn",
+        "name": "Monuments",
+        "primary": "#2a2a2a",
+        "secondary": "#d4a520",
+        "abbreviation": "BRK"
+      },
+      {
+        "eras": ["hardball", "modern"],
+        "city": "New York",
+        "name": "Empire",
+        "primary": "#1a1a3a",
+        "secondary": "#d4a520",
+        "abbreviation": "NYE"
+      }
+    ]
+  },
+  {
+    "franchiseId": "rovers",
+    "eras": ["hardball", "modern"],
+    "history": [
+      {
+        "eras": ["hardball"],
+        "city": "Brooklyn",
+        "name": "Sentinels",
+        "primary": "#2a4a1a",
+        "secondary": "#f0f0f0",
+        "abbreviation": "BKS"
+      },
+      {
+        "eras": ["modern"],
+        "city": "Los Angeles",
+        "name": "Rovers",
+        "primary": "#c85a1a",
+        "secondary": "#d4b896",
+        "abbreviation": "LAR"
+      }
+    ]
+  },
+  {
+    "franchiseId": "foundry",
+    "eras": ["deadball", "golden", "hardball", "modern"],
+    "history": [
+      {
+        "eras": ["deadball", "golden"],
+        "city": "Pittsburgh",
+        "name": "Foundry",
+        "primary": "#1a1a1a",
+        "secondary": "#d4a520",
+        "abbreviation": "PIT"
+      },
+      {
+        "eras": ["hardball", "modern"],
+        "city": "Detroit",
+        "name": "Foundry",
+        "primary": "#1a4a6a",
+        "secondary": "#d48820",
+        "abbreviation": "DET"
+      }
+    ]
+  },
+  {
+    "franchiseId": "deltas",
+    "eras": ["deadball", "golden", "hardball", "modern"],
+    "history": [
+      {
+        "eras": ["deadball"],
+        "city": "Baltimore",
+        "name": "Tides",
+        "primary": "#1a2a4a",
+        "secondary": "#d46820",
+        "abbreviation": "BAL"
+      },
+      {
+        "eras": ["golden", "hardball", "modern"],
+        "city": "New Orleans",
+        "name": "Deltas",
+        "primary": "#1a4a2a",
+        "secondary": "#d4a520",
+        "abbreviation": "NOD"
+      }
+    ]
+  },
+  {
+    "franchiseId": "cinders",
+    "eras": ["deadball", "golden"],
+    "history": [
+      {
+        "eras": ["deadball", "golden"],
+        "city": "Philadelphia",
+        "name": "Cinders",
+        "primary": "#5a1a2a",
+        "secondary": "#8a8a8a",
+        "abbreviation": "PHI"
+      }
+    ]
+  },
+  {
+    "franchiseId": "engines",
+    "eras": ["deadball"],
+    "history": [
+      {
+        "eras": ["deadball"],
+        "city": "Cincinnati",
+        "name": "Engines",
+        "primary": "#8b2020",
+        "secondary": "#1a1a1a",
+        "abbreviation": "CIN"
+      }
+    ]
+  },
+  {
+    "franchiseId": "ramblers",
+    "eras": ["golden", "hardball"],
+    "history": [
+      {
+        "eras": ["golden", "hardball"],
+        "city": "Kansas City",
+        "name": "Ramblers",
+        "primary": "#1a2a8a",
+        "secondary": "#8b2020",
+        "abbreviation": "KCR"
+      }
+    ]
+  },
+  {
+    "franchiseId": "glare",
+    "eras": ["modern"],
+    "history": [
+      {
+        "eras": ["modern"],
+        "city": "Miami",
+        "name": "Glare",
+        "primary": "#1a7a6a",
+        "secondary": "#e05a40",
+        "abbreviation": "MIA"
+      }
+    ]
+  },
+  {
+    "franchiseId": "ascent",
+    "eras": ["modern"],
+    "history": [
+      {
+        "eras": ["modern"],
+        "city": "Denver",
+        "name": "Ascent",
+        "primary": "#4a1a6a",
+        "secondary": "#a0a8b0",
+        "abbreviation": "DEN"
+      }
+    ]
+  }
+]

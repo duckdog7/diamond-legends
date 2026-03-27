@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <title>ramblers</title>
+    <path d="M 12 50 L 54 12 L 54 32 L 88 32 L 88 68 L 54 68 L 54 88 Z" fill="#1a2a8a"/>
+    <path d="M 30 50 L 54 26 L 54 38 L 72 38 L 72 62 L 54 62 L 54 74 Z" fill="#8b2020" opacity="0.4"/>
+</svg>

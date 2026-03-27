@@ -1,0 +1,19 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;900&family=Roboto+Mono:wght@400;500;600&display=swap');
+@import './styles/tokens.css';
+@import "tailwindcss";
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--stadium-green);
+  color: var(--parchment);
+  font-family: var(--font-body);
+  min-height: 100vh;
+}
+
+#root {
+  min-height: 100vh;
+}

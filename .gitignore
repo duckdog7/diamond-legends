@@ -25,3 +25,4 @@ design/references/
 *.njsproj
 *.sln
 *.sw?
+.github/

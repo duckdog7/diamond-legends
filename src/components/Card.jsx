@@ -72,7 +72,7 @@ function DLMark({ era }) {
 // then card.art, then renders the era placeholder passed as `fallback`.
 function PortraitImg({ card, imgStyle = {}, fallback }) {
   const [failed, setFailed] = useState(false)
-  const src = card.art || `/portraits/${card.id}.png`
+  const src = card.art || `${import.meta.env.BASE_URL}portraits/${card.id}.png`
   if (failed) return fallback
   return (
     <img

@@ -71,7 +71,7 @@ function contactBucket(pitchZone) {
  * @param {object} params.tokenEffects — { pullShift, oppoPush, gapFinder, infieldIn }
  * @returns {{ fieldZone: string, primaryFielder: string, baseDifficulty: string, extraBaseRisk: string, armMatters: boolean, doublePlayEligible: boolean }}
  */
-export function resolveBallFlight({ pitchType, thrownZone, contact, tokenEffects = {} }) {
+export function resolveBallFlight({ pitchType, thrownZone, contact, typeCorrect = false, tokenEffects = {} }) {
   const typeMatrix = matrix[pitchType]
   if (!typeMatrix) return fallbackFlight()
 
@@ -121,11 +121,18 @@ export function resolveBallFlight({ pitchType, thrownZone, contact, tokenEffects
 
   const zoneMeta = matrix._fieldZoneMap[fieldZone] ?? {}
 
+  let extraBaseRisk = entry.extraBaseRisk ?? 'low'
+  if (typeCorrect) {
+    if (extraBaseRisk === 'none') extraBaseRisk = 'low'
+    else if (extraBaseRisk === 'low') extraBaseRisk = 'high'
+    // 'high' stays 'high'
+  }
+
   return {
     fieldZone,
     primaryFielder: (Array.isArray(entry.primaryFielder) ? entry.primaryFielder[0] : entry.primaryFielder) ?? (zoneMeta.fielders ?? ['CF'])[0],
     baseDifficulty,
-    extraBaseRisk: entry.extraBaseRisk ?? 'low',
+    extraBaseRisk,
     armMatters: entry.armMatters ?? zoneMeta.armMatters ?? false,
     doublePlayEligible: entry.doublePlayEligible ?? false,
     doublePlayBonus: entry.doublePlayBonus ?? 0,

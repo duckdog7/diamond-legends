@@ -9,11 +9,20 @@
  *   // Repeat until state.status === 'complete'
  */
 
-import { buildPitchState, recordPitch, selectAIPitch } from './pitchAI'
+import { buildPitchState, recordPitch, selectAIPitch, penalizeBallAcrossZones } from './pitchAI'
 import { resolveContact, advanceCount, CONTACT } from './contactResolver'
 import { resolveBallFlight } from './ballFlight'
 import { resolveDefense, getFielder, OUTCOME } from './defenseResolver'
 import { earnTokensFromOutcome } from './tokens'
+import { getBallType, buildRunnerScenarios, resolveRunnerScenarios } from './baserunningResolver'
+
+// ─── Home run pre-check ───────────────────────────────────────────────────────
+// Must match the logic in defenseResolver.resolveHit() to keep parity.
+const HR_DEEP_ZONES = new Set(['deep_lf_lcf', 'deep_cf_rcf', 'deep_rf'])
+
+function checkHomeRun(contact, fieldZone) {
+  return contact === CONTACT.BARREL && HR_DEEP_ZONES.has(fieldZone) && Math.random() < 0.55
+}
 
 // ─── Inning phases ────────────────────────────────────────────────────────────
 
@@ -47,6 +56,7 @@ export function createAtBatState({
   inning = 1,
   half = 'top',
   runnersOn = false,
+  bases = null,   // [null|{card}, null|{card}, null|{card}] — runner card refs
 }) {
   return {
     // Identity
@@ -61,18 +71,23 @@ export function createAtBatState({
     inning,
     half,
     runnersOn,
+    bases: bases ?? [null, null, null],
     phase: getInningPhase(inning),
 
     // Resolution history (this at-bat)
     pitchLog: [],   // [{ zone, pitchType, batterZoneGuess, batterTypeGuess, contact, fieldZone, outcome }]
 
     // Status
-    status: 'awaiting_pitch',   // awaiting_pitch | awaiting_guess | resolving | complete
+    status: 'awaiting_pitch',   // awaiting_pitch | awaiting_guess | resolving | in_play | complete
     result: null,               // final OUTCOME when complete
-    bases: 0,
     error: false,
-    runnerAdvance: false,
     outs: 0,
+
+    // In-play data (populated when status === 'in_play')
+    inPlayData: null,
+
+    // Pre-computed runner resolution (set by resumeAtBat, used by advanceAfterResult)
+    inPlayResolution: null,
   }
 }
 
@@ -116,6 +131,8 @@ export function stepAtBat(state, input) {
   // ── Take-pitch path (batter does not swing) ───────────────────────────────
   if (take) {
     recordPitch(state.pitchState, thrownZone, pitchType)
+    // Ball penalty: proportionally drain remaining zone budgets when a ball is thrown
+    if (!isInZone) penalizeBallAcrossZones(state.pitchState)
 
     const newBalls   = isInZone ? state.count.balls   : state.count.balls   + 1
     const newStrikes = isInZone ? state.count.strikes + 1 : state.count.strikes
@@ -229,6 +246,7 @@ export function stepAtBat(state, input) {
     pitchType,
     thrownZone,
     contact: contactResult.contact,
+    typeCorrect: contactResult.typeCorrect ?? false,
     tokenEffects: {
       pullShift:  tokenEffects.pullShift  ?? false,
       oppoPush:   tokenEffects.oppoPush   ?? false,
@@ -237,24 +255,47 @@ export function stepAtBat(state, input) {
     },
   })
 
-  // ── Step 6: Defensive resolution ─────────────────────────────────────────
   const fielderCard = getFielder(flightResult.fieldZone, state.defenseLineup)
-  const defenseResult = resolveDefense({
-    fielderCard,
-    fieldZone:          flightResult.fieldZone,
-    baseDifficulty:     flightResult.baseDifficulty,
-    contact:            contactResult.contact,
-    extraBaseRisk:      flightResult.extraBaseRisk,
-    armMatters:         flightResult.armMatters,
-    doublePlayEligible: flightResult.doublePlayEligible,
-    doublePlayBonus:    flightResult.doublePlayBonus,
-    runnersOn:          state.runnersOn,
-  })
 
-  // ── Step 7: Record outcome ────────────────────────────────────────────────
-  const outcome = defenseResult.outcome
-  earnTokensFromOutcome(state.tokenState, outcome, 'batting')
-  earnTokensFromOutcome(state.tokenState, outcome, 'pitching')
+  // ── Home run pre-check — resolve immediately, skip in-play ───────────────
+  if (checkHomeRun(contactResult.contact, flightResult.fieldZone)) {
+    earnTokensFromOutcome(state.tokenState, OUTCOME.HOME_RUN, 'batting')
+    earnTokensFromOutcome(state.tokenState, OUTCOME.HOME_RUN, 'pitching')
+    const pitchEntry = {
+      zone: thrownZone, pitchType, coord: aiCoord, guessCoord,
+      batterZoneGuess, batterTypeGuess,
+      contact: contactResult.contact,
+      predictionResult: contactResult.predictionResult,
+      fieldZone: flightResult.fieldZone,
+      primaryFielder: flightResult.primaryFielder,
+      baseDifficulty: flightResult.baseDifficulty,
+      outcome: OUTCOME.HOME_RUN,
+    }
+    return { ...state, pitchLog: [...state.pitchLog, pitchEntry], status: 'complete', result: OUTCOME.HOME_RUN, outs: 0 }
+  }
+
+  // ── Step 6: Enter in-play — build scenario for UI ────────────────────────
+  // Determine fielding success (glove roll) now so InPlayScene knows whether
+  // this is a hit or an out-with-throw.
+  const gloveTool = fielderCard?.tools?.fielding ?? 60
+  const probRow   = { glove80plus: 0.98, glove60: 0.90, glove40: 0.78 }  // routine fallback
+  const successProbs = { routine: { glove80plus: 0.98, glove60: 0.90, glove40: 0.78 }, moderate: { glove80plus: 0.85, glove60: 0.72, glove40: 0.55 }, difficult: { glove80plus: 0.65, glove60: 0.48, glove40: 0.30 }, exceptional: { glove80plus: 0.35, glove60: 0.20, glove40: 0.08 } }
+  const diffRow   = successProbs[flightResult.baseDifficulty] ?? successProbs.moderate
+  const successP  = gloveTool >= 80 ? diffRow.glove80plus
+                  : gloveTool >= 60 ? diffRow.glove60 + ((gloveTool - 60) / 20) * (diffRow.glove80plus - diffRow.glove60)
+                  : gloveTool >= 40 ? diffRow.glove40 + ((gloveTool - 40) / 20) * (diffRow.glove60 - diffRow.glove40)
+                  : diffRow.glove40 * (gloveTool / 40)
+  const fieldingSuccess = Math.random() < successP
+
+  const scenarios = buildRunnerScenarios({
+    fieldZone:      flightResult.fieldZone,
+    fielderCard,
+    fieldingSuccess,
+    contact:        contactResult.contact,
+    baseDifficulty: flightResult.baseDifficulty,
+    batterCard:     state.batterCard,
+    bases:          state.bases,
+  })
 
   const pitchEntry = {
     zone: thrownZone, pitchType, coord: aiCoord, guessCoord,
@@ -264,18 +305,83 @@ export function stepAtBat(state, input) {
     fieldZone: flightResult.fieldZone,
     primaryFielder: flightResult.primaryFielder,
     baseDifficulty: flightResult.baseDifficulty,
-    outcome,
+    outcome: null,  // filled in by resumeAtBat
   }
 
   return {
     ...state,
     pitchLog: [...state.pitchLog, pitchEntry],
+    status: 'in_play',
+    inPlayData: {
+      flightResult,
+      fielderCard,
+      fieldingSuccess,
+      ballType:      getBallType(flightResult.fieldZone),
+      contact:       contactResult.contact,
+      scenarios,
+      bases:         state.bases ?? [null, null, null],
+      defenseLineup: state.defenseLineup ?? [],
+      pitcherCard:   state.pitcherCard ?? null,
+    },
+    inPlayResolution: null,
+  }
+}
+
+// ─── Resume at-bat after in-play decisions ────────────────────────────────────
+
+/**
+ * Called after the player has made send/hold decisions in InPlayScene.
+ * Resolves all throws, computes the final outcome, and returns a completed atBatState.
+ *
+ * @param {object} state           — atBatState with status === 'in_play'
+ * @param {object} sendDecisions   — { [scenarioId]: 'send' | 'hold' }
+ * @returns {object}               — completed atBatState
+ */
+export function resumeAtBat(state, sendDecisions = {}) {
+  if (state.status !== 'in_play' || !state.inPlayData) return state
+
+  const { scenarios, fieldingSuccess, ballType, flightResult } = state.inPlayData
+
+  const { runsScored, newBases, outsRecorded, plays } = resolveRunnerScenarios(scenarios, sendDecisions)
+
+  // Determine play outcome label
+  let outcome
+  if (!fieldingSuccess) {
+    // Ball got through — determine hit type
+    const isDeep = flightResult.fieldZone?.startsWith('deep')
+    if (ballType === 'ground') outcome = OUTCOME.SINGLE
+    else if (isDeep) outcome = OUTCOME.DOUBLE
+    else outcome = OUTCOME.SINGLE
+  } else if (ballType === 'ground') {
+    outcome = OUTCOME.OUT
+  } else {
+    // Fly/liner caught
+    outcome = OUTCOME.OUT
+  }
+
+  // Check for extra outs (runner thrown out)
+  const totalOuts = outsRecorded
+
+  earnTokensFromOutcome(state.tokenState, outcome, 'batting')
+  earnTokensFromOutcome(state.tokenState, outcome, 'pitching')
+
+  // Patch the last pitch log entry with the final outcome
+  const updatedPitchLog = state.pitchLog.map((p, i) =>
+    i === state.pitchLog.length - 1 ? { ...p, outcome } : p
+  )
+
+  return {
+    ...state,
+    pitchLog: updatedPitchLog,
     status: 'complete',
     result: outcome,
-    bases: defenseResult.bases,
-    error: defenseResult.error,
-    runnerAdvance: defenseResult.runnerAdvance,
-    outs: defenseResult.outs ?? 0,
+    outs: totalOuts,
+    inPlayResolution: {
+      runsScored,
+      newBases,
+      outsRecorded,
+      plays,
+    },
   }
 }
 
@@ -286,77 +392,89 @@ export function stepAtBat(state, input) {
  */
 export function createHalfInningState() {
   return {
-    outs: 0,
-    bases: [false, false, false],  // [1B, 2B, 3B]
-    runs: 0,
+    outs:  0,
+    bases: [null, null, null],  // [1B, 2B, 3B] — null | { card }
+    runs:  0,
   }
 }
 
 /**
  * Apply an at-bat result to half-inning state.
- * Simplified runner advancement — handles the most common cases.
+ * For in-play at-bats, uses the pre-computed inPlayResolution.
+ * For non-contact at-bats (K, BB), falls back to simple advancement logic.
+ *
  * @param {object} halfInning
  * @param {object} atBatResult  — completed atBatState
  * @returns {object} updated halfInning
  */
 export function applyAtBatResult(halfInning, atBatResult) {
-  const { result, bases, runnerAdvance, outs } = atBatResult
-  let { outs: currentOuts, bases: baseState, runs: currentRuns } = halfInning
-
-  // Outs
-  if (result === OUTCOME.OUT || result === OUTCOME.STRIKEOUT) {
-    return { ...halfInning, outs: currentOuts + 1 }
-  }
-
-  if (result === OUTCOME.DOUBLE_PLAY) {
-    return { ...halfInning, outs: Math.min(3, currentOuts + 2) }
-  }
-
-  // Walk: batter to first, force runners
-  if (result === OUTCOME.WALK) {
-    const newBases = [...baseState]
-    let scoringRuns = 0
-    if (newBases[0] && newBases[1] && newBases[2]) { scoringRuns = 1; newBases[2] = false }
-    if (newBases[0] && newBases[1]) newBases[2] = true
-    if (newBases[0]) newBases[1] = true
-    newBases[0] = true
-    return { ...halfInning, bases: newBases, runs: currentRuns + scoringRuns }
-  }
-
-  // Hit
-  let newBases = [...baseState]
-  let scoringRuns = 0
-
-  if (result === OUTCOME.HOME_RUN) {
-    scoringRuns = 1 + newBases.filter(Boolean).length
-    newBases = [false, false, false]
-    return { ...halfInning, bases: newBases, runs: currentRuns + scoringRuns }
-  }
-
-  if (result === OUTCOME.TRIPLE) {
-    scoringRuns = newBases.filter(Boolean).length
-    newBases = [false, false, true]
-    return { ...halfInning, bases: newBases, runs: currentRuns + scoringRuns }
-  }
-
-  if (result === OUTCOME.DOUBLE) {
-    // All runners score from 2B/3B; runner from 1B may score
-    if (newBases[2]) { scoringRuns++; newBases[2] = false }
-    if (newBases[1]) { scoringRuns++; newBases[1] = false }
-    if (newBases[0]) {
-      if (runnerAdvance) { scoringRuns++; newBases[0] = false }
-      else { newBases[2] = true; newBases[0] = false }
+  // ── In-play path: use pre-computed runner resolution ──────────────────────
+  if (atBatResult.inPlayResolution) {
+    const { runsScored, newBases, outsRecorded } = atBatResult.inPlayResolution
+    return {
+      outs:  halfInning.outs + outsRecorded,
+      bases: newBases,
+      runs:  runsScored,
     }
-    newBases[1] = true
-    return { ...halfInning, bases: newBases, runs: currentRuns + scoringRuns }
   }
 
-  // Single
-  if (newBases[2]) { scoringRuns++; newBases[2] = false }
-  if (newBases[1]) { newBases[2] = true; newBases[1] = false }
-  if (newBases[0]) { newBases[1] = true; newBases[0] = false }
-  if (runnerAdvance && newBases[1]) { scoringRuns++; newBases[1] = false }
-  newBases[0] = true
+  const { result } = atBatResult
+  const { outs: currentOuts, bases: baseState, runs: currentRuns } = halfInning
+  // Normalise legacy boolean bases to null-based runner slots
+  const norm   = (b) => (b === false || b === undefined ? null : b)
+  const batter = atBatResult.batterCard ? { card: atBatResult.batterCard } : null
 
-  return { ...halfInning, bases: newBases, runs: currentRuns + scoringRuns }
+  // Outs (strikeout / fielded out without in-play — should be rare now)
+  if (result === OUTCOME.STRIKEOUT) {
+    return { outs: currentOuts + 1, bases: baseState.map(norm), runs: currentRuns }
+  }
+  if (result === OUTCOME.DOUBLE_PLAY) {
+    return { outs: Math.min(3, currentOuts + 2), bases: baseState.map(norm), runs: currentRuns }
+  }
+
+  const b = baseState.map(norm)  // working copy with card objects or null
+
+  // Walk: batter to first, force runners along
+  if (result === OUTCOME.WALK) {
+    let scoring = 0
+    if (b[0] && b[1] && b[2]) { scoring++; b[2] = null }
+    if (b[0] && b[1]) b[2] = b[1]
+    if (b[0]) b[1] = b[0]
+    b[0] = batter
+    return { outs: currentOuts, bases: b, runs: currentRuns + scoring }
+  }
+
+  // Home run: everyone scores, bases clear
+  if (result === OUTCOME.HOME_RUN) {
+    const scoring = 1 + b.filter(Boolean).length
+    return { outs: currentOuts, bases: [null, null, null], runs: currentRuns + scoring }
+  }
+
+  // Triple: all runners score, batter to 3B
+  if (result === OUTCOME.TRIPLE) {
+    const scoring = b.filter(Boolean).length
+    return { outs: currentOuts, bases: [null, null, batter], runs: currentRuns + scoring }
+  }
+
+  // Double: 2B/3B runners score; 1B runner may score (runnerAdvance)
+  if (result === OUTCOME.DOUBLE) {
+    const runnerAdvance = atBatResult.runnerAdvance ?? false
+    let scoring = 0
+    if (b[2]) { scoring++; b[2] = null }
+    if (b[1]) { scoring++; b[1] = null }
+    if (b[0]) {
+      if (runnerAdvance) { scoring++; b[0] = null }
+      else { b[2] = b[0]; b[0] = null }
+    }
+    b[1] = batter
+    return { outs: currentOuts, bases: b, runs: currentRuns + scoring }
+  }
+
+  // Single: advance all runners one base
+  let scoring = 0
+  if (b[2]) { scoring++; b[2] = null }
+  if (b[1]) { b[2] = b[1]; b[1] = null }
+  if (b[0]) { b[1] = b[0]; b[0] = null }
+  b[0] = batter
+  return { outs: currentOuts, bases: b, runs: currentRuns + scoring }
 }

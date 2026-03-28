@@ -139,16 +139,17 @@ function heatBg(norm) {
 
 // ─── Component ─────────────────────────────────────────────────────────────────
 export default function ZoneCanvas({
-  mode          = 'guess',   // 'guess' | 'view'
-  selectedCoord = null,
-  onGuess       = null,
-  pitchLog      = [],
-  highlightLast = false,
-  overlayMode   = 'pitcher', // 'pitcher' | 'batter'
-  pitchState    = null,
-  pitcherCard   = null,
-  batterCard    = null,
-  disabled      = false,
+  mode              = 'guess',   // 'guess' | 'view'
+  selectedCoord     = null,
+  onGuess           = null,
+  pitchLog          = [],
+  highlightLast     = false,
+  overlayMode       = 'pitcher', // 'pitcher' | 'batter'
+  pitchState        = null,
+  pitcherCard       = null,
+  batterCard        = null,
+  disabled          = false,
+  blockDepletedZones = false,    // true in pitching mode — prevents clicking zones at 0
 }) {
   const svgRef   = useRef(null)
   const [hover, setHover] = useState(null)
@@ -179,7 +180,10 @@ export default function ZoneCanvas({
     const c = toSVGCoord(e)
     if (!c) return
     const zone = coordToZone(c.x, c.y)
-    if (zone && onGuess) onGuess(c, zone)
+    if (!zone) return
+    // Block depleted zones in pitching mode
+    if (blockDepletedZones && (pitchState?.remainingBudget?.[zone] ?? 1) === 0) return
+    if (onGuess) onGuess(c, zone)
   }
 
   function handleMove(e) {
@@ -203,7 +207,7 @@ export default function ZoneCanvas({
         fontFamily: 'Arial, sans-serif',
         textAlign: 'center',
       }}>
-        {overlayMode === 'pitcher' ? '% PITCHER TENDS TO THROW HERE' : '% HIT CHANCE BY ZONE'}
+        {overlayMode === 'pitcher' ? 'PITCHES THROWN BY ZONE' : '% HIT CHANCE BY ZONE'}
       </div>
 
       <svg
@@ -219,29 +223,45 @@ export default function ZoneCanvas({
         onMouseMove={handleMove}
         onMouseLeave={() => setHover(null)}
       >
-        {/* ── Zone cells: colored background + % label ── */}
+        {/* ── Zone cells: colored background + label ── */}
         {ZONE_KEYS.map(zone => {
-          const cell = zoneToCell(zone)
-          const raw  = rawValues[zone] ?? 0
-          const norm = normValues[zone] ?? 0
+          const cell      = zoneToCell(zone)
+          const raw       = rawValues[zone] ?? 0
+          const norm      = normValues[zone] ?? 0
+          const remaining = pitchState?.remainingBudget?.[zone] ?? null
+          const depleted  = blockDepletedZones && remaining === 0
 
-          // Display: pitcher = % remaining budget, batter = % hit chance
-          const displayStr = `${Math.round(raw * 100)}%`
+          // Display: pitcher = remaining budget count, batter = % hit chance
+          let displayStr
+          if (overlayMode === 'pitcher' && pitchState?.remainingBudget) {
+            displayStr = depleted ? '✕' : String(remaining ?? '·')
+          } else {
+            displayStr = `${Math.round(raw * 100)}%`
+          }
 
           return (
-            <g key={zone}>
+            <g key={zone} style={{ cursor: depleted ? 'not-allowed' : undefined }}>
               <rect
                 x={cell.x} y={cell.y} width={CELL_W} height={CELL_H}
-                fill={heatBg(norm)}
+                fill={depleted ? 'rgba(255,255,255,0.03)' : heatBg(norm)}
               />
+              {depleted && (
+                <rect
+                  x={cell.x} y={cell.y} width={CELL_W} height={CELL_H}
+                  fill="none"
+                  stroke="rgba(255,80,80,0.3)"
+                  strokeWidth="1"
+                  strokeDasharray="4 3"
+                />
+              )}
               <text
                 x={cell.x + CELL_W / 2}
                 y={cell.y + CELL_H / 2 + 4}
                 textAnchor="middle"
                 fontSize="11"
                 fontWeight="900"
-                fill={heatColor(norm)}
-                style={{ pointerEvents: 'none', fontFamily: 'Arial Black, Arial, sans-serif', opacity: 0.85 }}
+                fill={depleted ? 'rgba(255,80,80,0.5)' : heatColor(norm)}
+                style={{ pointerEvents: 'none', fontFamily: 'Arial Black, Arial, sans-serif', opacity: depleted ? 0.7 : 0.85 }}
               >
                 {displayStr}
               </text>

@@ -6,9 +6,9 @@
  * When a PNG is promoted from ComfyUI review it takes precedence over the SVG.
  */
 
-// Eagerly import all logo assets at build time
-const pngLogos = import.meta.glob('../assets/logos/*.png', { eager: true, as: 'url' })
-const svgLogos = import.meta.glob('../assets/logos/*.svg', { eager: true, as: 'url' })
+// Eagerly import all logo assets at build time (Vite 5+ syntax)
+const pngLogos = import.meta.glob('../assets/logos/*.png', { eager: true, query: '?url', import: 'default' })
+const svgLogos = import.meta.glob('../assets/logos/*.svg', { eager: true, query: '?url', import: 'default' })
 
 function getLogoUrl(franchiseId) {
   const png = pngLogos[`../assets/logos/${franchiseId}.png`]

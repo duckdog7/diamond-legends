@@ -17,20 +17,28 @@ export const CONTACT = {
 
 // Die pool sizes per prediction result
 const BASE_POOL = {
-  bothCorrect:         4,
+  bothCorrect:          5,
   zoneCorrectTypeWrong: 3,
   typeCorrectZoneWrong: 2,
-  bothWrong:           0,
+  bothWrong:            0,
 }
 
 // Tier thresholds: roll total needed to achieve each contact level
-// Pool of 4d6-style dice is simulated as a score 0–100
+// Pool of 5d6-style dice is simulated as a score 0–100
 const TIER_THRESHOLDS = {
-  [CONTACT.BARREL]: 85,
-  [CONTACT.HARD]:   65,
-  [CONTACT.SOLID]:  40,
-  [CONTACT.WEAK]:   15,
-  // below 15 = foul / no contact even if pool > 0
+  [CONTACT.BARREL]: 82,
+  [CONTACT.HARD]:   58,
+  [CONTACT.SOLID]:  30,
+  [CONTACT.WEAK]:   12,
+  // below 12 = foul / no contact even if pool > 0
+}
+
+// Prediction accuracy bonuses applied directly to roll
+const PREDICTION_ROLL_BONUS = {
+  bothCorrect:          18,  // zone + type both right — real hitter's count
+  zoneCorrectTypeWrong:  8,  // found the zone, wrong pitch — solid contact likely
+  typeCorrectZoneWrong:  4,  // right pitch type, wrong location
+  bothWrong:             0,
 }
 
 /**
@@ -109,7 +117,8 @@ export function resolveContact({
   // Simulate dice pool: each die is 1d20, sum, scale to 0–100
   let rawRoll = 0
   for (let i = 0; i < pool; i++) rawRoll += Math.random() * 20
-  const roll = Math.min(100, Math.max(0, Math.round((rawRoll / (pool * 20)) * 100) + avgMod))
+  const predBonus = PREDICTION_ROLL_BONUS[predictionResult] ?? 0
+  const roll = Math.min(100, Math.max(0, Math.round((rawRoll / (pool * 20)) * 100) + avgMod + predBonus))
 
   // ── 5. Determine contact tier ──────────────────────────────────────────────
   let contact
@@ -126,7 +135,7 @@ export function resolveContact({
     contact = order[Math.max(0, idx - 1)]
   }
 
-  return { contact, roll, pool, predictionResult }
+  return { contact, roll, pool, predictionResult, typeCorrect }
 }
 
 /**

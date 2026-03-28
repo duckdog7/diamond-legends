@@ -13,11 +13,33 @@ import aiTeams from './data/aiTeams.json'
 // Fallback AI team for quick-play when no season is active
 const FALLBACK_AI = aiTeams[0]
 
-// Add display fields to AI roster entries so engine + HUD can render them
+// Resolve AI roster entry to a real card, falling back to a synthetic stub
 function normalizeAICard(entry, teamId) {
+  // 1. Exact cardId match
+  if (entry.cardId) {
+    const exact = cards.find(c => c.id === entry.cardId)
+    if (exact) return exact
+  }
+  // 2. Fuzzy: same franchiseId + era + position
+  const fuzzy = cards.find(c =>
+    c.franchiseId === entry.franchiseId &&
+    c.era         === entry.era         &&
+    c.position    === entry.position
+  )
+  if (fuzzy) return fuzzy
+  // 3. Loose: any card with matching era + position (different team is fine)
+  const loose = cards.find(c =>
+    c.era      === entry.era &&
+    c.position === entry.position
+  )
+  if (loose) return loose
+  // 4. Position-only: any era (e.g. DH exists in modern but not deadball)
+  const anyEra = cards.find(c => c.position === entry.position)
+  if (anyEra) return anyEra
+  // 5. Synthetic stub
   return {
     ...entry,
-    id:   entry.cardId ?? `${teamId}_${entry.slot}`,
+    id:   `${teamId}_${entry.slot}`,
     name: `${entry.franchiseId} ${entry.slot}`,
   }
 }

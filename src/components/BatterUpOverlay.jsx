@@ -284,18 +284,17 @@ function PlayerPanel({ card, side, label, delay = 0 }) {
         </div>
       </div>
 
-      {/* Card hero — large, pulled toward center */}
+      {/* Card hero — vertically centered, slides inward from panel edge */}
       <motion.div
-        initial={{ y: 40, opacity: 0 }}
-        animate={{ y: 0,  opacity: 1 }}
-        transition={{ delay: delay + 0.1, type: 'spring', stiffness: 280, damping: 26 }}
+        initial={{ x: isLeft ? 100 : -100, y: -175, rotate: isLeft ? -3 : 3, opacity: 0 }}
+        animate={{ x: 0,                   y: -175, rotate: isLeft ? -3 : 3, opacity: 1 }}
+        transition={{ delay: delay + 0.08, type: 'spring', stiffness: 260, damping: 26 }}
         style={{
-          position:  'absolute',
-          bottom:    '0',
-          [isLeft ? 'right' : 'left']: '-20px',
-          filter:    `drop-shadow(0 12px 40px rgba(0,0,0,0.8)) drop-shadow(0 0 28px rgba(${rgb(secondary)},0.45))`,
-          transform: isLeft ? 'rotate(-3deg)' : 'rotate(3deg)',
-          zIndex:    3,
+          position: 'absolute',
+          top:      '50%',
+          [isLeft ? 'right' : 'left']: '-80px',
+          filter:   `drop-shadow(0 12px 40px rgba(0,0,0,0.8)) drop-shadow(0 0 28px rgba(${rgb(secondary)},0.45))`,
+          zIndex:   3,
         }}
       >
         <Card card={card} size="lg" />

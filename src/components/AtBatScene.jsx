@@ -21,15 +21,16 @@ import { useState, useCallback, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import AtBatHUD from './AtBatHUD'
 import BatterUpOverlay from './BatterUpOverlay'
-import LineScore from './LineScore'
+import Card from './Card'
 import PitcherPanel from './PitcherPanel'
 import BatterPanel from './BatterPanel'
 import FieldView from './FieldView'
 import GameStatsPanel from './GameStatsPanel'
 import ZoneCanvas, { PITCH_COLORS } from './ZoneCanvas'
+import InPlayScene from './InPlayScene'
 import { colors, fonts, fontSize, radius } from '../theme'
 import {
-  createAtBatState, stepAtBat, applyAtBatResult, getInningPhase,
+  createAtBatState, stepAtBat, resumeAtBat, applyAtBatResult, getInningPhase,
 } from '../engine/atBat'
 import { buildPitchState } from '../engine/pitchAI'
 import { selectAIBatterGuess } from '../engine/batterAI'
@@ -235,7 +236,7 @@ function buildGameState(firstBatter, aiPitcherCard, aiDefenseLineup, playerPitch
     halfStartScore:   { home: 0, away: 0 },
     inningScores:     { away: [], home: [] },
     outs:             0,
-    bases:            [false, false, false],
+    bases:            [null, null, null],
     aiPitchState,       // persistent — accumulates all top-half pitches across innings
     playerPitchState,   // persistent — accumulates all bottom-half pitches across innings
     tokenState,
@@ -308,6 +309,8 @@ export default function AtBatScene({
   const activePitchLog   = isPitching ? game.playerPitchLog  : game.aiPitchLog
   const activeRepertoire = activePitcher?.pitchRepertoire ?? ['FB']
   const phase            = getInningPhase(game.inning)
+  const nextBatterCard   = safeLineup[(batterIdx + 1) % safeLineup.length]
+  const nextBatterStats  = game.batterStats?.[nextBatterCard?.id] ?? null
 
   // Derive team identities for HUD display (fixed: player=away, AI=home)
   const awayTeam = useMemo(() =>
@@ -370,6 +373,21 @@ export default function AtBatScene({
     // Fix coord to match the player's actual target zone
     if (lastPitch && guessZone) lastPitch.coord = coordForZone(guessZone)
 
+    if (nextAtBat.status === 'in_play') {
+      setGame(prev => ({
+        ...prev,
+        atBat:          nextAtBat,
+        lastPitchType:  lastPitch?.pitchType ?? null,
+        lastResult:     null,
+        playerPitchLog: [...prev.playerPitchLog, lastPitch],
+        status:         'in_play',
+      }))
+      setGuessCoord(null)
+      setGuessZone(null)
+      setGuessType(null)
+      return
+    }
+
     setGame(prev => ({
       ...prev,
       atBat:          nextAtBat,
@@ -405,6 +423,22 @@ export default function AtBatScene({
 
     const lastPitch = nextAtBat.pitchLog[nextAtBat.pitchLog.length - 1]
 
+    if (nextAtBat.status === 'in_play') {
+      setGame(prev => ({
+        ...prev,
+        atBat:         nextAtBat,
+        lastPitchType: lastPitch?.pitchType ?? null,
+        lastResult:    null,
+        aiPitchLog:    [...prev.aiPitchLog, lastPitch],
+        status:        'in_play',
+      }))
+      setActiveTokenEffects({})
+      setGuessCoord(null)
+      setGuessZone(null)
+      setGuessType(null)
+      return
+    }
+
     setGame(prev => ({
       ...prev,
       atBat:         nextAtBat,
@@ -419,6 +453,25 @@ export default function AtBatScene({
     setGuessZone(null)
     setGuessType(null)
   }, [guessZone, guessType, guessCoord, game, activeTokenEffects, isPitching])
+
+  // ── In-play resolution — called by InPlayScene when player commits decisions ─
+  function handleInPlayResolve(sendDecisions) {
+    const completedAtBat = resumeAtBat(game.atBat, sendDecisions)
+    const lastPitch      = completedAtBat.pitchLog[completedAtBat.pitchLog.length - 1]
+    const patchLog = (log) => log.map((p, i) =>
+      i === log.length - 1 ? { ...p, outcome: completedAtBat.result } : p
+    )
+    setGame(prev => ({
+      ...prev,
+      atBat:          completedAtBat,
+      lastPitchType:  lastPitch?.pitchType ?? null,
+      lastResult:     completedAtBat.result,
+      aiPitchLog:     isPitching ? prev.aiPitchLog     : patchLog(prev.aiPitchLog),
+      playerPitchLog: isPitching ? patchLog(prev.playerPitchLog) : prev.playerPitchLog,
+      status: 'result',
+    }))
+    setResultVisible(true)
+  }
 
   // ── Advance after result ──────────────────────────────────────────────────
   function advanceAfterResult() {
@@ -475,6 +528,17 @@ export default function AtBatScene({
         return
       }
 
+      // Baseball rule: if home team leads after top of 9th (or later), skip bottom half
+      if (game.half === 'top' && game.inning >= MAX_INNINGS && newScore.home > newScore.away) {
+        setGame(prev => ({
+          ...prev,
+          score: newScore, inningScores: newIS,
+          batterStats: newBatterStats, aiBatterStats: newAiBatterStats,
+          status: 'game_over',
+        }))
+        return
+      }
+
       // Determine setup for new half — reuse existing (persistent) pitch states
       const newHalfPitcher    = newHalf === 'bottom' ? playerPitcherCard  : pitcherCard
       const newHalfDefense    = newHalf === 'bottom' ? safeLineup          : defenseLineup
@@ -501,7 +565,7 @@ export default function AtBatScene({
         inning: newInning, half: newHalf,
         score: newScore, halfStartScore: { ...newScore },
         inningScores: newIS,
-        outs: 0, bases: [false, false, false],
+        outs: 0, bases: [null, null, null],
         tokenState: newTokenState,
         atBat: newAtBat,
         atBatResults: newAtBatResults,
@@ -523,6 +587,7 @@ export default function AtBatScene({
       pitchState:   activePitchState,
       tokenState:   game.tokenState,
       inning: game.inning, half: game.half, runnersOn,
+      bases: newBases,
     })
 
     setShowBatterUp(true)
@@ -560,25 +625,47 @@ export default function AtBatScene({
         isPitching={isPitching}
         awayTeam={awayTeam}
         homeTeam={homeTeam}
-      />
-
-      {/* ── Line score ──────────────────────────────────────────────────────── */}
-      <LineScore
         inningScores={game.inningScores}
-        currentInning={game.inning}
-        half={game.half}
       />
 
       {/* ── Three-column main area ───────────────────────────────────────────── */}
       <div style={STYLES.main}>
 
-        {/* Left — active pitcher's panel */}
-        <div style={STYLES.sidePanel}>
-          <PitcherPanel
-            card={activePitcher}
-            pitchState={activePitchState}
-            pitchLog={activePitchLog}
+        {/* Left — AWAY (player's team) panel — fixed, never swaps */}
+        <div style={{
+          ...STYLES.sidePanel,
+          borderRadius: '10px',
+          background:   awayTeam?.primary ? `${awayTeam.primary}18` : 'transparent',
+          border:       awayTeam?.primary ? `1px solid ${awayTeam.primary}35` : '1px solid transparent',
+          overflow:     'hidden',
+        }}>
+          <RoleBanner
+            isBatting={!isPitching}
+            teamName={awayTeam?.name ?? 'AWAY'}
+            teamColor={awayTeam?.secondary ?? '#fff'}
+            teamBg={awayTeam?.primary ?? '#1a2040'}
           />
+          {isPitching ? (
+            <PitcherPanel
+              card={playerPitcherCard}
+              pitchState={game.playerPitchState}
+              pitchLog={game.playerPitchLog}
+            />
+          ) : (
+            <BatterPanel
+              card={batterCard}
+              tokenState={game.tokenState}
+              atBatResults={game.atBatResults}
+              pitchesSeen={game.aiPitchLog.length}
+              onSpendToken={handleSpendToken}
+              phase={phase}
+              showTokens={!resultVisible}
+            />
+          )}
+          {/* Up Next — only shown when player is batting */}
+          {!isPitching && nextBatterCard && (
+            <OnDeckBatter card={nextBatterCard} stats={nextBatterStats} />
+          )}
         </div>
 
         {/* Center — zone + controls */}
@@ -631,31 +718,45 @@ export default function AtBatScene({
             </div>
           </div>
 
-          {/* Zone canvas */}
-          <ZoneCanvas
-            mode={resultVisible ? 'view' : 'guess'}
-            selectedCoord={guessCoord}
-            onGuess={handleGuess}
-            pitchLog={activePitchLog}
-            highlightLast={resultVisible && activePitchLog.length > 0}
-            overlayMode={overlayMode}
-            pitchState={activePitchState}
-            pitcherCard={activePitcher}
-            batterCard={currentBatter}
-            disabled={resultVisible}
-          />
+          {/* Zone canvas — hidden during in-play */}
+          {game.status !== 'in_play' && (
+            <ZoneCanvas
+              mode={resultVisible ? 'view' : 'guess'}
+              selectedCoord={guessCoord}
+              onGuess={handleGuess}
+              pitchLog={activePitchLog}
+              highlightLast={resultVisible && activePitchLog.length > 0}
+              overlayMode={overlayMode}
+              pitchState={activePitchState}
+              pitcherCard={activePitcher}
+              batterCard={currentBatter}
+              disabled={resultVisible}
+              blockDepletedZones={isPitching}
+            />
+          )}
+
+          {/* In-play scene — replaces zone canvas */}
+          {game.status === 'in_play' && game.atBat.inPlayData && (
+            <InPlayScene
+              inPlayData={game.atBat.inPlayData}
+              currentBases={game.bases}
+              onResolve={handleInPlayResolve}
+            />
+          )}
 
           {/* Instruction label */}
-          <div style={{
-            fontSize: fontSize.xs, color: colors.text.label, letterSpacing: '0.12em',
-            fontFamily: fonts.ui,
-          }}>
-            {resultVisible
-              ? 'PITCH LOCATION'
-              : isPitching
-                ? 'SELECT TARGET ZONE · CHOOSE PITCH TYPE · THROW'
-                : 'CLICK ZONE · SELECT PITCH TYPE · SWING'}
-          </div>
+          {game.status !== 'in_play' && (
+            <div style={{
+              fontSize: fontSize.xs, color: colors.text.label, letterSpacing: '0.12em',
+              fontFamily: fonts.ui,
+            }}>
+              {resultVisible
+                ? 'PITCH LOCATION'
+                : isPitching
+                  ? 'SELECT TARGET ZONE · CHOOSE PITCH TYPE · THROW'
+                  : 'CLICK ZONE · SELECT PITCH TYPE · SWING'}
+            </div>
+          )}
 
           {/* Result banner */}
           <AnimatePresence>
@@ -736,7 +837,7 @@ export default function AtBatScene({
           </AnimatePresence>
 
           {/* Pitch / throw type selector */}
-          {!resultVisible && (
+          {!resultVisible && game.status !== 'in_play' && (
             <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', justifyContent: 'center' }}>
               {activeRepertoire.map(typeId => {
                 const typeData = pitchTypesData.find(p => p.id === typeId)
@@ -757,7 +858,7 @@ export default function AtBatScene({
           )}
 
           {/* Active token effects (batting only) */}
-          {!isPitching && Object.keys(activeTokenEffects).length > 0 && (
+          {!isPitching && game.status !== 'in_play' && Object.keys(activeTokenEffects).length > 0 && (
             <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', justifyContent: 'center' }}>
               {Object.keys(activeTokenEffects).map(e => (
                 <div key={e} style={{
@@ -773,61 +874,81 @@ export default function AtBatScene({
             </div>
           )}
 
-          {/* Action buttons */}
-          {resultVisible ? (
-            <motion.button
-              onClick={advanceAfterResult}
-              whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.96 }}
-              style={STYLES.actionBtn(true)}
-            >
-              NEXT →
-            </motion.button>
-          ) : isPitching ? (
-            // Pitching mode: just THROW button
-            <motion.button
-              onClick={commitThrow}
-              disabled={!canAction}
-              whileHover={canAction ? { scale: 1.03 } : {}}
-              whileTap={canAction ? { scale: 0.96 } : {}}
-              style={STYLES.throwBtn(canAction)}
-            >
-              THROW
-            </motion.button>
-          ) : (
-            // Batting mode: TAKE + PITCH buttons
-            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          {/* Action buttons — hidden during in-play (InPlayScene has its own Resolve button) */}
+          {game.status !== 'in_play' && (
+            resultVisible ? (
               <motion.button
-                onClick={commitTake}
+                onClick={advanceAfterResult}
                 whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.96 }}
-                style={STYLES.takeBtn}
-                title="Watch pitch without swinging"
+                style={STYLES.actionBtn(true)}
               >
-                Take
+                NEXT →
               </motion.button>
+            ) : isPitching ? (
               <motion.button
-                onClick={commitGuess}
+                onClick={commitThrow}
                 disabled={!canAction}
                 whileHover={canAction ? { scale: 1.03 } : {}}
                 whileTap={canAction ? { scale: 0.96 } : {}}
-                style={STYLES.actionBtn(canAction)}
+                style={STYLES.throwBtn(canAction)}
               >
-                Swing
+                THROW
               </motion.button>
-            </div>
+            ) : (
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <motion.button
+                  onClick={commitTake}
+                  whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.96 }}
+                  style={STYLES.takeBtn}
+                  title="Watch pitch without swinging"
+                >
+                  Take
+                </motion.button>
+                <motion.button
+                  onClick={commitGuess}
+                  disabled={!canAction}
+                  whileHover={canAction ? { scale: 1.03 } : {}}
+                  whileTap={canAction ? { scale: 0.96 } : {}}
+                  style={STYLES.actionBtn(canAction)}
+                >
+                  Swing
+                </motion.button>
+              </div>
+            )
           )}
         </div>
 
-        {/* Right — current batter panel */}
-        <div style={STYLES.sidePanel}>
-          <BatterPanel
-            card={currentBatter}
-            tokenState={game.tokenState}
-            atBatResults={game.atBatResults}
-            pitchesSeen={activePitchLog.length}
-            onSpendToken={handleSpendToken}
-            phase={phase}
-            showTokens={!resultVisible && !isPitching}
+        {/* Right — HOME (AI's team) panel — fixed, never swaps */}
+        <div style={{
+          ...STYLES.sidePanel,
+          borderRadius: '10px',
+          background:   homeTeam?.primary ? `${homeTeam.primary}18` : 'transparent',
+          border:       homeTeam?.primary ? `1px solid ${homeTeam.primary}35` : '1px solid transparent',
+          overflow:     'hidden',
+        }}>
+          <RoleBanner
+            isBatting={isPitching}
+            teamName={homeTeam?.name ?? 'HOME'}
+            teamColor={homeTeam?.secondary ?? '#fff'}
+            teamBg={homeTeam?.primary ?? '#1a2040'}
           />
+          {isPitching ? (
+            <BatterPanel
+              card={aiBatterCard}
+              tokenState={game.tokenState}
+              atBatResults={game.atBatResults}
+              pitchesSeen={game.playerPitchLog.length}
+              onSpendToken={() => {}}
+              phase={phase}
+              showTokens={false}
+            />
+          ) : (
+            <PitcherPanel
+              card={pitcherCard}
+              pitchState={game.aiPitchState}
+              pitchLog={game.aiPitchLog}
+            />
+          )}
         </div>
       </div>
 
@@ -867,6 +988,142 @@ export default function AtBatScene({
         isPitching={isPitching}
         onDismiss={() => setShowBatterUp(false)}
       />
+    </div>
+  )
+}
+
+// ─── On-deck batter strip — card stack + name/stats ──────────────────────────
+function OnDeckBatter({ card, stats }) {
+  if (!card?.id) return null
+
+  const ab  = stats?.ab ?? 0
+  const h   = stats?.h  ?? 0
+  const hr  = stats?.hr ?? 0
+  const bb  = stats?.bb ?? 0
+  const statLine = ab > 0
+    ? `${h}-${ab}${hr > 0 ? `, ${hr} HR` : ''}${bb > 0 ? `, ${bb} BB` : ''}`
+    : 'No AB yet'
+
+  // Card sm = 150×210; slivers = 9px each
+  const CW = 150, CH = 210, SLIVER = 9
+
+  return (
+    <div style={{
+      marginTop:   '8px',
+      padding:     '8px 12px',
+      background:  'rgba(255,255,255,0.04)',
+      borderTop:   '1px solid rgba(255,255,255,0.08)',
+      borderRadius:'0 0 8px 8px',
+    }}>
+      <div style={{
+        fontSize:      '0.58rem',
+        fontWeight:    900,
+        letterSpacing: '0.14em',
+        color:         'rgba(255,255,255,0.35)',
+        fontFamily:    'Arial Black, Arial, sans-serif',
+        marginBottom:  '8px',
+      }}>
+        ON DECK
+      </div>
+
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+        {/* Card stack — top card fully visible, 2 ghost backs peeking below */}
+        <div style={{
+          position:   'relative',
+          width:       CW,
+          height:      CH + SLIVER * 2,
+          flexShrink:  0,
+        }}>
+          {/* Ghost card 3 (deepest) */}
+          <div style={{
+            position:     'absolute', top: SLIVER * 2, left: 3, zIndex: 1,
+            width:         CW - 6, height: CH,
+            borderRadius:  '7px',
+            background:    'linear-gradient(160deg, #1a1a2e, #0d0d1a)',
+            border:        '1px solid rgba(255,255,255,0.06)',
+          }}/>
+          {/* Ghost card 2 */}
+          <div style={{
+            position:     'absolute', top: SLIVER, left: 1, zIndex: 2,
+            width:         CW - 2, height: CH,
+            borderRadius:  '8px',
+            background:    'linear-gradient(160deg, #1e1e36, #111124)',
+            border:        '1px solid rgba(255,255,255,0.10)',
+          }}/>
+          {/* Top card — actual next batter */}
+          <div style={{ position: 'absolute', top: 0, left: 0, zIndex: 3 }}>
+            <Card card={card} size="sm" />
+          </div>
+        </div>
+
+        {/* Name + stats */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', paddingTop: '4px', minWidth: 0 }}>
+          <div style={{
+            fontSize:      '0.72rem',
+            fontWeight:    900,
+            color:         '#fff',
+            fontFamily:    'Arial Black, Arial, sans-serif',
+            whiteSpace:    'nowrap',
+            overflow:      'hidden',
+            textOverflow:  'ellipsis',
+          }}>
+            {card.name}
+          </div>
+          <div style={{
+            fontSize:      '0.62rem',
+            color:         'rgba(255,255,255,0.45)',
+            fontFamily:    'Arial, sans-serif',
+            letterSpacing: '0.04em',
+          }}>
+            {card.position}
+          </div>
+          <div style={{
+            fontSize:      '0.68rem',
+            fontWeight:    700,
+            color:         ab > 0 ? '#22c55e' : 'rgba(255,255,255,0.25)',
+            fontFamily:    fonts.ui,
+            marginTop:     '4px',
+          }}>
+            {statLine}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── Role banner — shown above each side panel ────────────────────────────────
+function RoleBanner({ isBatting, teamName, teamColor, teamBg }) {
+  const color  = isBatting ? '#22c55e' : '#f59e0b'
+  const label  = isBatting ? '● AT BAT' : '⚡ PITCHING'
+  return (
+    <div style={{
+      display:        'flex',
+      alignItems:     'center',
+      justifyContent: 'space-between',
+      padding:        '6px 12px',
+      background:     `${color}18`,
+      borderBottom:   `2px solid ${color}55`,
+    }}>
+      <span style={{
+        fontSize:      '0.65rem',
+        fontWeight:    900,
+        letterSpacing: '0.12em',
+        color,
+        fontFamily:    'Arial Black, Arial, sans-serif',
+      }}>
+        {label}
+      </span>
+      <span style={{
+        fontSize:      '0.62rem',
+        fontWeight:    700,
+        letterSpacing: '0.08em',
+        color:         'rgba(255,255,255,0.5)',
+        fontFamily:    'Arial, sans-serif',
+        textTransform: 'uppercase',
+      }}>
+        {teamName}
+      </span>
     </div>
   )
 }

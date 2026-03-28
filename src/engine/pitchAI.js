@@ -37,6 +37,10 @@ function combinedAffinity(repertoire) {
   })
   const sum = Object.values(aff).reduce((a, b) => a + b, 0) || 1
   ZONE_KEYS.forEach(z => { aff[z] /= sum })
+  // Sharpen distribution: amplify differences so zones have markedly different tendencies
+  ZONE_KEYS.forEach(z => { aff[z] = Math.pow(aff[z], 1.8) })
+  const sum2 = Object.values(aff).reduce((a, b) => a + b, 0) || 1
+  ZONE_KEYS.forEach(z => { aff[z] /= sum2 })
   return aff
 }
 
@@ -229,6 +233,25 @@ export function selectAIPitch(pitcherCard, pitchState, gameContext = {}) {
     coord:     isInZone ? coord : ballCoord(),
     isInZone,
   }
+}
+
+// ─── Ball penalty: distribute 1 wasted pitch across all zones proportionally ──
+/**
+ * When a pitch is thrown outside the zone (isInZone=false) and the batter takes it,
+ * additionally subtract a fractional share of 1 pitch from every zone.
+ * Each zone loses Math.round(remainingBudget[zone] / totalRemaining) pitches.
+ * Standard rounding: <0.5 → 0, ≥0.5 → 1.
+ *
+ * Effect is subtle early (small fractions), but grows meaningful late-game when
+ * budgets are depleted and one zone dominates the remaining total.
+ */
+export function penalizeBallAcrossZones(pitchState) {
+  const rb    = pitchState.remainingBudget
+  const total = Object.values(rb).reduce((a, b) => a + b, 0) || 1
+  ZONE_KEYS.forEach(z => {
+    const penalty = Math.round(rb[z] / total)
+    if (penalty > 0) rb[z] = Math.max(0, rb[z] - penalty)
+  })
 }
 
 // ─── Remaining-budget zone summary (for display) ──────────────────────────────

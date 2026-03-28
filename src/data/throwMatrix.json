@@ -1,0 +1,66 @@
+{
+  "_notes": "Throw distance tiers and arm penalties per fielder position per target base. Used by baserunningResolver.js. Distances are approximate feet. armPenalty is subtracted from arm score before probability lookup.",
+
+  "_throwSuccessProbabilities": {
+    "_notes": "Base out probability by distance tier × arm score. Before speed and lead time modifiers.",
+    "short":     { "arm80": 0.90, "arm60": 0.75, "arm40": 0.52 },
+    "medium":    { "arm80": 0.72, "arm60": 0.55, "arm40": 0.32 },
+    "long":      { "arm80": 0.52, "arm60": 0.35, "arm40": 0.15 },
+    "very_long": { "arm80": 0.35, "arm60": 0.20, "arm40": 0.06 }
+  },
+
+  "3B": {
+    "1B":   { "distanceTier": "long",   "feet": 127, "note": "Across the diamond — signature long throw" },
+    "2B":   { "distanceTier": "short",  "feet": 60,  "note": "Short pivot or flip" },
+    "home": { "distanceTier": "long",   "feet": 110, "note": "Down the line, shorter than 3B-1B" }
+  },
+
+  "SS": {
+    "1B":   { "distanceTier": "long",   "feet": 120, "note": "Classic long throw from the hole" },
+    "2B":   { "distanceTier": "short",  "feet": 55,  "note": "Short pivot, double play relay" },
+    "3B":   { "distanceTier": "short",  "feet": 70,  "note": "Short throw to bag" },
+    "home": { "distanceTier": "medium", "feet": 100, "note": "Relay throw home" }
+  },
+
+  "2B": {
+    "1B":   { "distanceTier": "short",  "feet": 65,  "note": "Double play flip or toss" },
+    "3B":   { "distanceTier": "long",   "feet": 120, "note": "Long throw against the grain" },
+    "home": { "distanceTier": "medium", "feet": 100, "note": "Relay or cut-off throw home" }
+  },
+
+  "1B": {
+    "2B":   { "distanceTier": "medium", "feet": 85,  "note": "Standard throw to second" },
+    "3B":   { "distanceTier": "long",   "feet": 110, "note": "Long throw across infield" },
+    "home": { "distanceTier": "medium", "feet": 90,  "note": "Throw home on bunt/force" }
+  },
+
+  "C": {
+    "1B":   { "distanceTier": "medium", "feet": 90,  "note": "Short pop throw or pickoff relay" },
+    "2B":   { "distanceTier": "long",   "feet": 127, "note": "Classic catcher steal throw" },
+    "3B":   { "distanceTier": "medium", "feet": 100, "note": "Throw on steal attempt" }
+  },
+
+  "LF": {
+    "home": { "distanceTier": "very_long", "feet": 260, "note": "Deep left to home — premium arm play" },
+    "2B":   { "distanceTier": "long",      "feet": 170, "note": "LF throw to 2B" },
+    "3B":   { "distanceTier": "long",      "feet": 180, "note": "LF throw to 3B" }
+  },
+
+  "CF": {
+    "home": { "distanceTier": "very_long", "feet": 300, "note": "Dead center — longest throw in the game" },
+    "2B":   { "distanceTier": "medium",    "feet": 130, "note": "CF throw to 2B — medium range" },
+    "3B":   { "distanceTier": "long",      "feet": 190, "note": "CF throw to 3B" }
+  },
+
+  "RF": {
+    "home": { "distanceTier": "very_long", "feet": 280, "note": "Deep right to home — Maris territory" },
+    "2B":   { "distanceTier": "long",      "feet": 160, "note": "RF throw to 2B" },
+    "3B":   { "distanceTier": "very_long", "feet": 250, "note": "RF to 3B — very long cross-field throw" }
+  },
+
+  "P": {
+    "1B":   { "distanceTier": "short",  "feet": 50,  "note": "Pitcher covers or throws on comebacker" },
+    "2B":   { "distanceTier": "medium", "feet": 85,  "note": "Pitcher throw to second" },
+    "home": { "distanceTier": "short",  "feet": 55,  "note": "Comebacker throw home" }
+  }
+}

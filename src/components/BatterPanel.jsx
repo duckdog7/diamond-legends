@@ -69,7 +69,7 @@ const OUTCOME_COLORS = {
   error: '#f59e0b',
 }
 
-const TOOL_ORDER  = ['average', 'power', 'speed', 'fielding', 'arm']
+const TOOL_ORDER  = ['average', 'power', 'speed']
 const TOOL_LABELS = { average: 'AVG', power: 'PWR', speed: 'SPD', fielding: 'FLD', arm: 'ARM' }
 const TOOL_COLORS = {
   average: '#60a5fa', power: '#fbbf24', speed: '#a78bfa',
@@ -152,11 +152,6 @@ export default function BatterPanel({
       <Card card={card} size="md" />
 
       <div style={STYLES.statBox}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={STYLES.label}>PITCHES SEEN</div>
-          <div style={STYLES.value}>{pitchesSeen}</div>
-        </div>
-
         <AtBatHistory atBatResults={atBatResults} />
         <ToolBars tools={card.tools} />
       </div>

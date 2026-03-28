@@ -147,50 +147,8 @@ function FielderDot({ pos, x, y, present }) {
   )
 }
 
-// ─── Play log ─────────────────────────────────────────────────────────────────
-function PlayLog({ events }) {
-  const displayed = [...events].reverse().slice(0, 5)
-  return (
-    <div style={{
-      display:       'flex',
-      flexDirection: 'column',
-      gap:           '3px',
-      marginTop:     '6px',
-    }}>
-      <div style={{
-        fontSize:      '0.65rem',
-        color:         'rgba(255,255,255,0.3)',
-        letterSpacing: '0.12em',
-        fontFamily:    fonts.ui,
-        marginBottom:  '2px',
-      }}>
-        PLAY LOG
-      </div>
-      {displayed.length === 0 && (
-        <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.2)', fontFamily: fonts.ui }}>
-          —
-        </div>
-      )}
-      {displayed.map((evt, i) => (
-        <div key={i} style={{
-          fontSize:   '0.70rem',
-          fontFamily: fonts.ui,
-          color:      i === 0 ? '#fff' : 'rgba(255,255,255,0.45)',
-          fontWeight: i === 0 ? 700 : 400,
-          lineHeight: 1.3,
-          whiteSpace: 'nowrap',
-          overflow:   'hidden',
-          textOverflow: 'ellipsis',
-        }}>
-          {i === 0 ? '▶ ' : '  '}{evt}
-        </div>
-      ))}
-    </div>
-  )
-}
-
 // ─── Export ───────────────────────────────────────────────────────────────────
-export default function FieldView({ bases, defenseLineup, pitcherCard, playLog = [] }) {
+export default function FieldView({ bases, defenseLineup, pitcherCard }) {
   return (
     <div style={{
       display:       'flex',
@@ -200,7 +158,6 @@ export default function FieldView({ bases, defenseLineup, pitcherCard, playLog =
       borderRight:   '1px solid rgba(255,255,255,0.07)',
       boxSizing:     'border-box',
     }}>
-      {/* Field label */}
       <div style={{
         fontSize:      '0.65rem',
         color:         'rgba(255,255,255,0.3)',
@@ -210,14 +167,9 @@ export default function FieldView({ bases, defenseLineup, pitcherCard, playLog =
       }}>
         FIELD
       </div>
-
-      {/* SVG field */}
       <div style={{ flex: 1, minHeight: 0 }}>
         <FieldSVG bases={bases} defenseLineup={defenseLineup} pitcherCard={pitcherCard} />
       </div>
-
-      {/* Play log */}
-      <PlayLog events={playLog} />
     </div>
   )
 }

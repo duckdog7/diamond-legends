@@ -17,7 +17,7 @@
  *   onGameEnd         fn({ score, log })
  */
 
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback, useMemo, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import AtBatHUD from './AtBatHUD'
 import BatterUpOverlay from './BatterUpOverlay'
@@ -297,6 +297,7 @@ export default function AtBatScene({
   const [activeTokenEffects, setActiveTokenEffects] = useState({})
   const [overlayMode, setOverlayMode] = useState('pitcher')
   const [showBatterUp, setShowBatterUp] = useState(true)
+  const pendingAtBat = useRef(null)
 
   // ── Derived ───────────────────────────────────────────────────────────────
   const isPitching       = game.half === 'bottom'
@@ -454,10 +455,18 @@ export default function AtBatScene({
     setGuessType(null)
   }, [guessZone, guessType, guessCoord, game, activeTokenEffects, isPitching])
 
-  // ── In-play resolution — called by InPlayScene when player commits decisions ─
+  // ── In-play resolution — step 1: resolve + return plays for animation ─────
   function handleInPlayResolve(sendDecisions) {
     const completedAtBat = resumeAtBat(game.atBat, sendDecisions)
-    const lastPitch      = completedAtBat.pitchLog[completedAtBat.pitchLog.length - 1]
+    pendingAtBat.current = completedAtBat
+    return completedAtBat.inPlayResolution?.plays ?? []
+  }
+
+  // ── In-play resolution — step 2: called after animation finishes ──────────
+  function handleInPlayDone() {
+    const completedAtBat = pendingAtBat.current
+    if (!completedAtBat) return
+    const lastPitch = completedAtBat.pitchLog[completedAtBat.pitchLog.length - 1]
     const patchLog = (log) => log.map((p, i) =>
       i === log.length - 1 ? { ...p, outcome: completedAtBat.result } : p
     )
@@ -471,6 +480,7 @@ export default function AtBatScene({
       status: 'result',
     }))
     setResultVisible(true)
+    pendingAtBat.current = null
   }
 
   // ── Advance after result ──────────────────────────────────────────────────
@@ -671,7 +681,8 @@ export default function AtBatScene({
         {/* Center — zone + controls */}
         <div style={{
           ...STYLES.center,
-          ...(isPitching ? {
+          ...(game.status === 'in_play' ? { alignItems: 'stretch', gap: 0 } : {}),
+          ...(isPitching && game.status !== 'in_play' ? {
             padding:      '16px',
             borderRadius: '12px',
             background:   'rgba(251,191,36,0.03)',
@@ -679,44 +690,48 @@ export default function AtBatScene({
           } : {}),
         }}>
 
-          {/* Role badge + overlay toggle */}
-          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-            <div style={STYLES.halfBadge(isPitching)}>
-              {isPitching ? '⚡ YOU ARE PITCHING' : '🏏 YOU ARE BATTING'}
-            </div>
-          </div>
+          {/* Role badge + overlay toggle — hidden during in-play */}
+          {game.status !== 'in_play' && (
+            <>
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <div style={STYLES.halfBadge(isPitching)}>
+                  {isPitching ? '⚡ YOU ARE PITCHING' : '🏏 YOU ARE BATTING'}
+                </div>
+              </div>
 
-          <div style={STYLES.toggleRow}>
-            <button style={STYLES.toggleBtn(overlayMode === 'pitcher')}
-              onClick={() => setOverlayMode('pitcher')}>
-              PITCHER ZONES
-            </button>
-            <button style={STYLES.toggleBtn(overlayMode === 'batter')}
-              onClick={() => setOverlayMode('batter')}>
-              BATTER ZONES
-            </button>
-          </div>
+              <div style={STYLES.toggleRow}>
+                <button style={STYLES.toggleBtn(overlayMode === 'pitcher')}
+                  onClick={() => setOverlayMode('pitcher')}>
+                  PITCHER ZONES
+                </button>
+                <button style={STYLES.toggleBtn(overlayMode === 'batter')}
+                  onClick={() => setOverlayMode('batter')}>
+                  BATTER ZONES
+                </button>
+              </div>
 
-          {/* Pitch count badge */}
-          <div style={{
-            display:      'flex',
-            alignItems:   'center',
-            gap:          '10px',
-            background:   isPitching ? 'rgba(251,191,36,0.08)' : 'rgba(255,255,255,0.05)',
-            border:       `1px solid ${isPitching ? 'rgba(251,191,36,0.25)' : 'rgba(255,255,255,0.1)'}`,
-            borderRadius: radius.pill,
-            padding:      '6px 22px',
-          }}>
-            <div style={{ fontSize: fontSize.xxs, color: colors.text.label, letterSpacing: '0.16em', fontFamily: fonts.ui }}>
-              PITCHES
-            </div>
-            <div style={{ fontSize: fontSize.xl, fontWeight: 900, color: isPitching ? '#fbbf24' : '#fff', fontFamily: fonts.ui, lineHeight: 1 }}>
-              {activePitchState.totalPitches}
-            </div>
-            <div style={{ fontSize: fontSize.xxs, color: colors.text.muted, fontFamily: fonts.ui }}>
-              / {activePitchState.maxPitches}
-            </div>
-          </div>
+              {/* Pitch count badge */}
+              <div style={{
+                display:      'flex',
+                alignItems:   'center',
+                gap:          '10px',
+                background:   isPitching ? 'rgba(251,191,36,0.08)' : 'rgba(255,255,255,0.05)',
+                border:       `1px solid ${isPitching ? 'rgba(251,191,36,0.25)' : 'rgba(255,255,255,0.1)'}`,
+                borderRadius: radius.pill,
+                padding:      '6px 22px',
+              }}>
+                <div style={{ fontSize: fontSize.xxs, color: colors.text.label, letterSpacing: '0.16em', fontFamily: fonts.ui }}>
+                  PITCHES
+                </div>
+                <div style={{ fontSize: fontSize.xl, fontWeight: 900, color: isPitching ? '#fbbf24' : '#fff', fontFamily: fonts.ui, lineHeight: 1 }}>
+                  {activePitchState.totalPitches}
+                </div>
+                <div style={{ fontSize: fontSize.xxs, color: colors.text.muted, fontFamily: fonts.ui }}>
+                  / {activePitchState.maxPitches}
+                </div>
+              </div>
+            </>
+          )}
 
           {/* Zone canvas — hidden during in-play */}
           {game.status !== 'in_play' && (
@@ -735,12 +750,12 @@ export default function AtBatScene({
             />
           )}
 
-          {/* In-play scene — replaces zone canvas */}
+          {/* In-play scene — fills center column when active */}
           {game.status === 'in_play' && game.atBat.inPlayData && (
             <InPlayScene
               inPlayData={game.atBat.inPlayData}
-              currentBases={game.bases}
               onResolve={handleInPlayResolve}
+              onDone={handleInPlayDone}
             />
           )}
 
